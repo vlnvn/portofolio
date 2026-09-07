@@ -39,3 +39,11 @@ Normal-text contrast ≥4.5:1; large text and meaningful interface indicators �
 Field p75 INP ≤200ms is a future monitoring target, not a ship verdict without field data. Lighthouse cannot verify field INP or predict every user's connection. Images and fonts reserve layout space.
 
 No exceptions approved. Missing resume and production origin are tracked dependencies; neither may be filled with an invented value.
+
+## Theme behavior
+
+- First visit follows `prefers-color-scheme`; a manual light/dark choice persists locally.
+- Apply the selected theme before first paint; no visible wrong-theme flash.
+- The control is a native button with `role="switch"`, accurate `aria-checked`, a changing accessible label, a 44×44px target, and visible focus.
+- Both themes pass the same contrast, keyboard, zoom, overflow and reduced-motion checks.
+- Do not add a theme package.

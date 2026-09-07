@@ -11,9 +11,10 @@ Valensius is an Informatics Engineering student whose work spans an AI competiti
 | KAIROS | AI reliability/evaluation decisions and technical team-lead context | K1–K8, K10, K12, K17–K18 |
 | Ayam Kalintang | Completed software for a real business, revised through user feedback | B1–B7, B10 |
 | The Colors of MIPA | Coordination across 9 programs, 30+ contributors and a documented engagement result | C1–C5 |
+| Aether3D | Supporting personal experiment linking generated Blender Python with a simplified browser preview | A1–A3 |
 | N.A.R.A. | Supporting interface and full-stack integration work in a team AI application | N1–N4 |
 
-No public Claude application section, program pitch, trait slogan or AI affiliation claim. Aether3D and Color Picker are omitted from the initial architecture: none of the reviewer's remaining questions requires them.
+No public Claude application section, program pitch, trait slogan or AI affiliation claim. Color Picker remains omitted. Aether3D appears only as supporting work and must keep the proxy/verification boundary explicit.
 
 ## Exact homepage order and density budgets
 
@@ -26,6 +27,7 @@ Budgets are ceilings, not word-count goals. Labels, role and date are metadata, 
 | Selected work: KAIROS | Establish strongest technical evidence | K1, K3, K6–K8 | Description ≤30 words; role/context; 3 evidence points ≤18 words each; 1 real screenshot with caption ≤20 words | Read KAIROS case study |
 | Selected work: Ayam Kalintang | Show business context, completion and specific contribution | B1–B2, B5–B7, B10 | Description ≤30 words; role/context; 3 evidence points ≤18 words each; 1 real screenshot + caption | Read kiosk case study |
 | Selected work: The Colors of MIPA | Make student coordination a featured outcome | C1–C5 | Description ≤30 words; role/context; 2 evidence points ≤24 words each; 1 short context paragraph ≤45 words; artifact link | Watch The Colors of MIPA on Instagram |
+| More work: Aether3D | Add a focused personal AI/3D experiment without overstating output verification | A1–A3 | One description ≤30 words, implementation boundary, source; optional real proxy capture | Inspect repository |
 | More work: N.A.R.A. | Supply supporting full-stack evidence without competing with lead cases | N1–N4 | One description ≤25 words, exact role, 2 contribution points ≤18 words each; text presentation | Inspect repository |
 | Contact and footer | Enable a concrete next step | P3–P4 | Email, GitHub, LinkedIn; resume only when provided; name/copyright | Email |
 
@@ -67,7 +69,9 @@ Homepage prose target: 300–500 words, hard ceiling 600 excluding navigation/li
 - **Never publish:** workshop attendance, club membership, university-wide coverage, reach/views, current live likes, invented channels/process/timeline, claims of sole production.
 - **Visual/artifact:** user-supplied [Instagram Reel](https://www.instagram.com/reel/DL_5D0XxNnq/). Link works as the artifact even without a thumbnail. No automatic social embed; no invented still or synthetic people. A future verified still may replace empty media space; none is required for layout.
 
-## Supporting project
+## Supporting projects
+
+**Aether3D.** Draft factual description: “Personal AI/3D experiment that requests Blender Python and a simplified browser preview from Gemini.” Current source uses Gemini. The preview is a proxy and must not be presented as executed Blender output. Do not claim a competition win, active Cloud Run deployment, measured 60 FPS, production readiness or adoption. Link directly to https://github.com/vlnvn/aether3d. Homepage only.
 
 **N.A.R.A.** Draft factual description: “Nutrition-planning interface connected to a Python recommendation service.” Role: Full-Stack & UI/UX Engineering. Context: team project, 2026 supported by source history. Homepage points: onboarding/dashboard/profile flows; recommendation mapping and meal-plan persistence. Link directly to repository. Core engine ownership remains with the team attribution in N4. No clinical-safety or performance numbers. No dedicated route or annotated debug screenshot in the initial portfolio.
 
@@ -87,9 +91,9 @@ Resume remains a delivery dependency, not a disabled/fake link. No form, appoint
 
 **Choose Option A:** `/`, `/work/kairos`, `/work/ayam-kalintang`. Add framework 404 and technical metadata endpoints, not additional content pages.
 
-KAIROS requires explaining model judgment and human boundaries; the kiosk requires a user-feedback example and real operating constraints. Putting both in full on the homepage would delay discovery of the community project. Detail pages provide depth through one intentional click. Colors and N.A.R.A. do not have enough distinct approved detail to justify separate routes.
+KAIROS requires explaining model judgment and human boundaries; the kiosk requires a user-feedback example and real operating constraints. Putting both in full on the homepage would delay discovery of the community project. Detail pages provide depth through one intentional click. Colors, Aether3D and N.A.R.A. do not have enough distinct approved detail to justify separate routes.
 
-**Reject Option B:** a long single page either buries the community work under engineering detail or strips useful technical reasoning. Accordions would add interaction cost and can hide critical ownership/limitations. No project tabs or filter UI for four entries.
+**Reject Option B:** a long single page either buries the community work under engineering detail or strips useful technical reasoning. Accordions would add interaction cost and can hide critical ownership/limitations. No project tabs or filter UI for five entries.
 
 ## First-60-seconds walkthrough — design hypothesis to validate later
 

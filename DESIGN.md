@@ -1,108 +1,91 @@
 # Production design contract
 
+Status: locked 7 September 2026 after browser calibration. Direction B uses a compact project register with a crafted but quiet visual system.
+
 ## Design principle
 
-Use a compact project register to put role, evidence, and source access in one scan path. The page should read as an inspected body of work, with restrained project-specific changes only where the evidence needs different emphasis.
+Evidence should be faster to find than decoration. One quiet index surface gives the opening an authored shape; project identity comes from real artifacts, factual roles, and different evidence rhythms.
 
 ## Page composition
 
-- A slim header contains `Work` and `Contact`.
-- The opening pairs the introduction with a three-item project index.
-- `Selected work` contains KAIROS, Ayam Kalintang, and The Colors of MIPA in that order.
-- `More work` contains N.A.R.A. as a shorter supporting entry.
-- Contact closes the page. Do not add a standalone About section unless it contains new verified facts.
-- Detail routes exist only for KAIROS and Ayam Kalintang.
+Header → split introduction and project index → featured project rows → supporting-work rows → contact/footer. The first featured row begins in the initial desktop and mobile viewport. Long reasoning stays on the two detail routes.
 
 ## Grid
 
-- Shell: `max-width: 1200px`, centered, with `36px` inline padding at 1024px and above, `28px` from 768–1023px, and `20px` below 768px.
-- Opening at 1024px and above: `380px minmax(0, 1fr)` with an `84px` gutter.
-- Project row at 1024px and above: `260px minmax(0, 1fr) 124px` with `32px` gutters. Columns are project/problem, role/evidence, and source.
-- At 768–1023px: `200px minmax(0, 1fr)` with a `24px` gutter; sources align under the evidence column.
-- Below 768px: one column in this order: project/problem, role/context, evidence, ownership boundary, source, media.
-- Align major sections to the shell edges and row content to the first text baseline where practical.
+- Shell maximum: `1160px`; horizontal padding `20px` mobile, `32px` tablet, `40px` desktop.
+- Desktop opening: `5/7` columns. Project rows: `3/7/2` columns with `32px` gutters.
+- At `≤900px`, project rows become two columns: identity `minmax(180px, 0.75fr)` and evidence `1.5fr`; source joins evidence.
+- At `≤680px`, use one column in semantic order. Do not preserve empty desktop tracks.
 
 ## Typography
 
-- Family: IBM Plex Sans, self-hosted under the OFL. Load Latin subsets and weights 400, 500, and 600 only.
-- Body: `18px/1.55` desktop and `17px/1.55` mobile, weight 400.
-- Name: `clamp(38px, 3.1vw, 44px)`, line-height 1.05, weight 500, tracking `-0.025em`.
-- Section title: `22px/1.2`, weight 500.
-- Project title: `28px/1.15`, weight 500; `27px` mobile.
-- Role: body size, weight 600. Context, boundaries, index context, and captions: `15–16px`, weight 400.
-- The Colors contributor result may use `20px/1.35`, weight 600. This is the only result line with extra typographic emphasis.
-- Body paragraphs: maximum `65ch`; project descriptions: maximum `32ch`; evidence text: maximum `68ch`.
+- Family: IBM Plex Sans, locally hosted Latin files. Use 400 for prose, 500 for names/links, 600 for roles and short evidence labels.
+- Name: `clamp(2.5rem, 5vw, 4rem)`, weight 500, line-height `0.98`, tracking `-0.035em`.
+- Section/project headings: `clamp(1.65rem, 2.4vw, 2.25rem)`, weight 500, line-height `1.08`.
+- Body: `clamp(1rem, 0.35vw + .92rem, 1.125rem)`, line-height `1.55`.
+- Metadata: `0.9rem–1rem`, line-height `1.45`; never use tiny uppercase eyebrows.
+- Prose line length: `48–68ch`; evidence lines may be shorter.
 
 ## Color
 
-- Canvas: `#FFFFFF`.
-- Primary text: `#22282C`.
-- Secondary text: `#4A5459`.
-- Link and focus accent: `#244861`. Accent exists only to identify interaction and focus.
-- Rules: `#CBD1CB`.
-- Optional neutral media backing: `#F3F5F3`.
-- Text and interactive states must meet WCAG 2.2 AA. Do not encode meaning through color alone.
+Light tokens: background `#f4f8f7`, surface `#e9f2ef`, text `#10211e`, muted `#536661`, rule `#c7d6d2`, accent `#006f69`, focus `#007d76`.
+
+Dark tokens: background `#07120f`, surface `#102823`, text `#edf7f3`, muted `#a9bbb5`, rule `#28423b`, accent `#72d8cf`, focus `#8ce9e0`.
+
+The accent marks links, focus and the active theme state. Tune themes independently. Text and controls must meet WCAG 2.2 AA; focus indicators must reach 3:1 against adjacent colors. Theme browser chrome and text selection should use the active tokens.
 
 ## Spacing
 
-Use `4, 8, 12, 16, 20, 24, 32, 40, 48, 64px`. Project rows use `24–30px` vertical padding on desktop and `20–24px` on mobile. Prefer a smaller value from the scale before adding a new one.
+Use `4, 8, 12, 16, 24, 32, 48, 64, 88px`. Opening padding is `48–64px` top and `64–88px` bottom on desktop, `32px` top and `48px` bottom on mobile. Project rows use `40–64px` vertical spacing.
 
-## Rules and separators
+## Rules, radius and shadows
 
-- Use one-pixel neutral rules for the header, project-row boundaries, and footer.
-- The desktop project index uses row separators; its mobile version uses spacing without a rule after every item.
-- Do not place multiple rules around a heading when one boundary already establishes the group.
-
-## Radius and shadows
-
-- Radius: `0` for structure and text; up to `4px` only when real media needs crop containment.
-- Shadows: none by default.
+Use one-pixel rules for header, project boundaries and index rows. Avoid duplicate separators. Structural containers remain square. Radius is `10px` for the index surface and real media crop; the theme switch may be pill-shaped because its track communicates a binary state. Shadows default to none. One low-spread shadow may separate a real artifact from the page when its edge is otherwise unclear.
 
 ## Project-specific composition
 
 ### KAIROS
 
-Project/problem in column one. Column two begins with Team Lead and competition context, followed by the three evidence points and team/MVP boundary. The source sits in column three. A real review-queue capture may follow the evidence in column two; omit the media block until that capture exists.
+Column one: project name and problem. Column two: Team Lead, competition context, three evidence points, explicit team/MVP boundary, source, then one real review-queue capture if available. Never render a placeholder in production.
 
 ### Ayam Kalintang
 
-Project/business problem in column one. Column two begins with Full-Stack Engineer · Deputy Team Lead and the Bakti BCA dates, followed by completion, owned implementation areas, UAT revisions, and team boundary. The source sits in column three. Place one tightly cropped kiosk image after the evidence; reserve admin and receipt artifacts for the detail page.
+Column one: project name and business problem. Column two: Full-Stack Engineer · Deputy Team Lead, dates/completion, owned kiosk/admin/customization work, receipt/UAT revisions, source, then a real kiosk crop. Detail-only artifacts cover admin and receipt workflows.
 
 ### The Colors of MIPA
 
-Keep the register columns. Put External Relations and BEM context before the two results. Emphasize the `30+ contributors / all 9 programs` line by one typographic step, then show `target 200 / result 1,002`. The Reel is the source. Do not add a decorative image or make this section smaller than the software rows.
+Keep full featured-row weight. Put role and BEM context before `30+ contributors across all 9 programs`; set that line one typographic step above body text. Follow with `target 200 likes; result 1,002` and the Reel link. No decorative media is required.
+
+### Aether3D
+
+Use a short supporting row before N.A.R.A. State that it is a personal AI/3D experiment using Gemini to request Blender Python and a simplified browser preview. If a real browser capture is used, label the preview as a simplified proxy. Homepage only.
 
 ### N.A.R.A.
 
-Use a shorter row under `More work`. Keep role, interface ownership, recommendation mapping/persistence, teammate AI-engine boundary, and source visible. Media is optional and must not elevate it above the featured work.
+Use a short supporting row. Keep the exact role, owned interface flows, recommendation mapping/persistence, teammate AI-engine boundary and source visible. Media is optional.
 
 ## Media treatment
 
-- Use only real repository/application artifacts. Never simulate product UI.
-- Homepage captures use a consistent shallow crop around the relevant interface, without a device frame.
-- Preserve readable UI labels at 1440px and avoid personal or live business data.
-- Captions identify artifact state only when that affects interpretation, such as a historical interface.
-- If a clean artifact is unavailable, omit the media space and record the need in `ASSET_PLAN.md`.
+Use only real project artifacts. Homepage crops are shallow, without browser/device frames, and must keep task-defining UI labels legible. Historical or proxy states receive plain captions. If a safe artifact is unavailable, omit its space.
 
-## Link treatment
+## Links
 
-Use descriptive, underlined text with a four-pixel underline offset. Hover increases underline weight. Focus uses a visible two-pixel outline with four-pixel offset. Minimum interactive height is 44px where layout permits. State destinations (`KAIROS source`, `Instagram Reel`) instead of generic labels.
+Use descriptive underlined text with `4px` underline offset. Hover thickens the underline. Focus uses a visible `2px` outline with `4px` offset. Place source links directly after the evidence they validate. Interactive targets are at least `44×44px` when presented as controls.
 
-## Motion
+## Theme and motion
 
-No motion is approved for the initial build. Anchor jumps remain immediate. Any later transition must preserve meaning with `prefers-reduced-motion` and earn its place through an interaction need.
+The two-state theme button uses an inline sun, a compact track/thumb and an inline moon. It is a semantic `button` with `role="switch"`, current `aria-checked`, and a changing accessible label. The first visit follows `prefers-color-scheme`; a manual choice persists in local storage. Apply the theme before paint to prevent a wrong-theme flash. Use no theme package.
+
+Approved motion: `120–180ms` color and thumb-position transitions on the theme control and link state changes. No entrance or scroll animation. Disable nonessential transitions under `prefers-reduced-motion`.
 
 ## Mobile transformation
 
-- Collapse each row into the specified semantic reading order; do not preserve empty desktop columns.
-- Keep the complete three-project index in the first viewport at 320–430px.
-- Keep KAIROS ownership and source within one normal scroll, and make the full Colors participation result visible by two normal scrolls at 320px after final media crops.
-- Allow names and roles to wrap naturally. Never reduce body text below 17px to save height.
+Keep the name, two factual lines and the complete three-project index in the first viewport at 320–430px. Keep `Work` in the header; contact may move to the footer. Collapse rows to project → role/context → evidence → source → media. Body text stays at least `16px`; primary reading copy targets `17px`.
 
-## Accessibility requirements
+## Accessibility
 
-Use semantic landmarks, one `h1`, ordered headings, a keyboard-visible skip link, visible focus, useful alt text, 44px touch targets, resilient zoom at 200%, and no horizontal overflow at 320px. External links must remain understandable out of context. Decorative assets use empty alt text; evidence-bearing captures describe the visible task and state.
+Use landmarks, one `h1`, ordered headings, a keyboard-visible skip link, native anchors/buttons, visible focus, useful alt text, 44px control targets, 200% zoom resilience, adequate contrast in both themes, reduced-motion support and no horizontal overflow at 320px. The theme switch must announce its state and label without relying on its icons.
 
 ## Anti-patterns
 
-No cards, badges, pills, gradients, shadows, glass, decorative code, fake terminals, animation, technology walls, arbitrary numbering, repeated labels, duplicate identity blocks, empty media placeholders, or generic calls to action. Do not let the register become a résumé table: project descriptions, ownership boundaries, real artifacts, and the single Colors result emphasis must keep the composition tied to this work.
+No decorative gradients, glass, glowing borders, generic cards, badges, bento layout, stock imagery, fake interfaces, decorative code, technology wall, oversized hero, repeated eyebrow labels, arbitrary numbering, automated social embed or motion on scroll. Do not repeat the same container geometry for every project. Do not use theme styling to imitate another product brand.

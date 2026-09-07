@@ -1,6 +1,6 @@
 # Portfolio specification
 
-Status: production specification, locked 7 September 2026. Implementation has not started. EVIDENCE.md controls facts; CONTENT_ARCHITECTURE.md controls order and density; CONSTRAINTS.md controls measurable quality gates; DESIGN.md controls presentation.
+Status: production specification, locked 7 September 2026. The verified first production slice is implemented; later sections and routes remain planned. EVIDENCE.md controls facts; CONTENT_ARCHITECTURE.md controls order and density; CONSTRAINTS.md controls measurable quality gates; DESIGN.md controls presentation.
 
 ## Purpose and audience
 
@@ -15,7 +15,7 @@ Support the 2026–2027 undergraduate Claude campus application through independ
 
 ## Content hierarchy and featured work
 
-Navigation → introduction/project index → selected work (KAIROS, kiosk, Colors) → N.A.R.A. → Contact/footer. Use the density limits in CONTENT_ARCHITECTURE.md. Reserve longer technical explanations for the two case studies. No technology list or uniform four-card gallery.
+Navigation → introduction/project index → selected work (KAIROS, kiosk, Colors) → supporting work (Aether3D, N.A.R.A.) → Contact/footer. Use the density limits in CONTENT_ARCHITECTURE.md. Reserve longer technical explanations for the two case studies. No technology list or uniform four-card gallery.
 
 ## Routes
 
@@ -27,7 +27,7 @@ Navigation → introduction/project index → selected work (KAIROS, kiosk, Colo
 | Unmatched paths | Useful 404 with Home and Work destinations | Framework 404 |
 | `/sitemap.xml`, `/robots.txt` | Production-origin technical metadata | Generated at build/configuration time |
 
-Do not create separate About, Contact, resume viewer, Colors, N.A.R.A., blog or application pages. Native source/artifact links provide further depth.
+Do not create separate About, Contact, resume viewer, Colors, Aether3D, N.A.R.A., blog or application pages. Native source/artifact links provide further depth.
 
 ## Case-study structure
 
@@ -44,7 +44,7 @@ Target 450–650 words per case, hard ceiling 750. One lead screenshot and at mo
 
 ## Intended architecture
 
-Preferred implementation: Next.js App Router, TypeScript strict mode, Tailwind CSS; exact supported versions and APIs verified against official documentation at implementation start. No version invention now and no package installation this stage.
+Resolved baseline: Next.js 16.3.4 App Router, React 19.2.8, TypeScript 6.0.3 strict mode, Tailwind CSS 4.3.3 and PostCSS integration. TypeScript 7 and ESLint 10 were tested but rejected because the current Next lint stack does not support them together.
 
 - Server/static content by default; client code only for a real interaction.
 - Content records store project identity, role, context, evidence IDs, destinations and media metadata. Shared page shell/navigation/footer; avoid a universal project-card component that flattens all evidence.
@@ -56,6 +56,7 @@ Preferred implementation: Next.js App Router, TypeScript strict mode, Tailwind C
 
 - Native anchors and links; browser Back works; homepage anchors have stable IDs and visible headings.
 - Critical content is never hidden behind hover, carousel, drag, tab, accordion or animation.
+- Provide a two-state light/dark switch. First visit follows the system setting; a manual choice persists locally and is applied before paint. Use a semantic switch with a changing accessible label and no theme dependency.
 - Entire media panels are not clickable when they contain other links. Use descriptive text actions; no nested interactive controls.
 - Keep external navigation same-tab by default; if new-tab behavior is introduced, communicate it and use appropriate link relationship attributes.
 - Contact uses visible email plus mailto. Resume uses a real downloadable file only when supplied and checked.
@@ -94,7 +95,7 @@ Homepage initial transfer ≤1MB compressed, total route JS ≤200KB compressed,
 
 ## Non-goals
 
-No skills cloud, services, testimonials, certifications wall, blog, fake terminal/dashboard, stock portrait, custom cursor, gratuitous 3D, counters, animated hero, filters, theme toggle, newsletter, contact form or Claude imitation.
+No skills cloud, services, testimonials, certifications wall, blog, fake terminal/dashboard, stock portrait, custom cursor, gratuitous 3D, counters, animated hero, filters, newsletter, contact form or Claude imitation.
 
 ## Factuality and presentation rules
 

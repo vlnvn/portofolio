@@ -12,15 +12,15 @@ Build the compact project-register contract in `DESIGN.md`. Each completed slice
 
 **Verification:** Clean install, version report, dev server, typecheck, lint, and empty production build.
 
-## 1. Tokens, typography, and shell
+## 1. Tokens, typography, theme, and shell
 
-**Goal:** Implement the locked grid, colors, spacing, rules, IBM Plex Sans files, header, footer, and accessibility primitives.
+**Goal:** Implement the locked grid, dual-theme tokens, spacing, rules, IBM Plex Sans files, pre-paint theme script, header, theme switch, footer, and accessibility primitives.
 
 **Files / area:** Global CSS, root layout, local font assets, shell components.
 
-**Acceptance criteria:** Exact `DESIGN.md` tokens; 400/500/600 Latin font files only; skip link and focus states; no font layout shift.
+**Acceptance criteria:** Exact `DESIGN.md` tokens in light and dark; one 45KB variable Latin WOFF2; system preference on first visit; persisted manual choice; correct switch name/state; no wrong-theme flash; skip link and focus states; no font layout shift.
 
-**Verification:** Browser captures at 320, 375, 430, 768, 1024, and 1440; font/network inspection; accessibility baseline.
+**Verification:** Light/dark browser captures at 320, 375, 430, 768, 1024, and 1440; reload/persistence check; keyboard switch check; font/network inspection; accessibility baseline.
 
 ## 2. Homepage opening and index
 
@@ -62,13 +62,13 @@ Build the compact project-register contract in `DESIGN.md`. Each completed slice
 
 **Verification:** First/two-scroll visibility captures, factual diff, and external-link check.
 
-## 6. N.A.R.A. supporting entry
+## 6. Aether3D and N.A.R.A. supporting entries
 
-**Goal:** Show interface and integration work without claiming teammates' AI engine.
+**Goal:** Show a bounded personal AI/3D experiment and interface/integration work without overstating generated output or teammates' AI engine.
 
 **Files / area:** `More work` register row.
 
-**Acceptance criteria:** Role, flows, response mapping/persistence, engine boundary, and source are visible; weight remains below featured work.
+**Acceptance criteria:** Aether3D states Gemini, Blender Python and simplified-proxy boundaries; N.A.R.A. states role, flows, mapping/persistence and engine boundary; sources are visible; both remain below featured work.
 
 **Verification:** Factual diff, hierarchy review, and link test.
 
@@ -192,17 +192,17 @@ Build the compact project-register contract in `DESIGN.md`. Each completed slice
 
 **Verification:** Live smoke test, broken-link crawl, metadata checks, and final browser capture.
 
-## Dependency proposal
+## Dependency resolution
 
 | Name | Why required | Alternative without it |
 |---|---|---|
-| `next`, `react`, `react-dom` | Requested application/runtime stack | Plain static HTML would lose the selected production framework and metadata routing |
-| `typescript` and React/Node type packages | Strict compile-time checks | JavaScript with JSDoc, which does not meet the requested stack |
+| `next@16.3.4`, `react@19.2.8`, `react-dom@19.2.8` | Requested application/runtime stack | Plain static HTML would lose the selected production framework and metadata routing |
+| `typescript@6.0.3` and React/Node type packages | Strict compile-time checks; TypeScript 7 is not yet supported by the current Next lint stack | JavaScript with JSDoc, which does not meet the requested stack |
 | `tailwindcss` and its current official build integration | Requested styling system and token implementation | Handwritten CSS modules; viable but outside the preferred stack |
-| ESLint with current Next.js rules | Framework-aware linting and quality gate | Typecheck plus manual review, with weaker framework checks |
-| `@playwright/test` | Required browser, keyboard, link, and overflow coverage | Manual browser matrix, less repeatable and contrary to the requested gate |
+| `eslint@9.39.5` with `eslint-config-next@16.3.4` | Framework-aware linting; ESLint 10 is not yet supported by all included plugins | Typecheck plus manual review, with weaker framework checks |
+| `@playwright/test@1.63.0` | Required browser, keyboard, link, and overflow coverage | Manual browser matrix, less repeatable and contrary to the requested gate |
 
-Do not add icon, class-merging, animation, component, analytics, state, data-fetching, CMS, or carousel packages. Use platform APIs and small local components.
+Do not add theme, icon, class-merging, animation, component, analytics, state, data-fetching, CMS, or carousel packages. Use platform APIs and small local components.
 
 ## Pre-mortem
 
@@ -212,4 +212,4 @@ Do not add icon, class-merging, animation, component, analytics, state, data-fet
 | Colors remains technically present but its full result is too late on mobile | The 30+/nine-program line is absent after two 0.85-viewport scrolls at 320px | Tasks 10–11 use a shallow kiosk crop, compact spacing, and an explicit two-scroll criterion |
 | Source links look detached from their claims | Inspection requires crossing a wide empty column or mobile sources follow media | Tasks 3–6 align desktop sources to evidence and keep mobile sources before media; task 16 retests proximity |
 | Screenshots reduce trust through debug UI, stale states, or private data | Captures show development controls, blank canvas, real orders, or unexplained states | Task 10 uses seeded offline states, strips metadata, and labels historical artifacts |
-| Compact copy blurs personal versus team ownership | A scan misses `personal work`, team boundaries, or the N.A.R.A. engine boundary | Every project slice has an ownership acceptance check; task 17 audits claims before copy freezes |
+| Compact copy blurs personal versus team ownership | A scan misses `personal work`, Aether3D's proxy boundary, team boundaries, or the N.A.R.A. engine boundary | Every project slice has an ownership acceptance check; task 17 audits claims before copy freezes |

@@ -7,7 +7,7 @@ The portfolio has two purposes:
 1. support the 2026–2027 Claude Builder Club application with concrete project and campus-work evidence;
 2. remain useful as an engineering portfolio for recruiters and collaborators.
 
-Production implementation has not started. The selected design is Direction B: a compact project register that places each project's problem, role, evidence, ownership boundary, and source in one scan path.
+Production implementation has started with a verified first slice: the application shell, light/dark theme system, introduction, project index, KAIROS row, and the opening of Ayam Kalintang. The selected design is Direction B: a compact project register that places each project's problem, role, evidence, ownership boundary, and source in one scan path.
 
 ## Reading order
 
@@ -37,6 +37,7 @@ Do not turn an inference into a public claim.
 - **KAIROS** — dispatcher decision-support for pickup-promise review. Valensius was Team Lead for the COMPFEST 18 AI Innovation Challenge in 2026. The human dispatcher retains every operational decision.
 - **Ayam Kalintang Self-Order Kiosk** — kiosk and staff tools completed in July 2026 for a local culinary business. Valensius worked as Full-Stack Engineer and Deputy Team Lead.
 - **The Colors of MIPA** — a BEM FMIPA student project involving all nine undergraduate programs. Valensius coordinated 30+ contributors; a target of 200 likes resulted in 1,002 likes.
+- **Aether3D** — a personal AI/3D experiment that requests Blender Python and a simplified browser preview from Gemini. The preview is a proxy, not executed Blender geometry.
 - **N.A.R.A.** — supporting full-stack and interface work for a nutrition-planning application connected to a Python recommendation service. The core recommendation engine is team-owned.
 
 ## Design validation
@@ -48,7 +49,7 @@ Directions A and B were rendered with identical content at 1440×900, 375×812, 
 | A — evidence-margin narrative | 8.35/10 |
 | B — compact project register | 8.55/10 |
 
-The complete findings are in [design-review/REPORT.md](design-review/REPORT.md). Post-distillation browser captures are stored beside that report. Direction B won because it exposes role, technical evidence, ownership boundary, and source access faster. It still requires careful mobile media cropping and a stronger presentation of the Colors participation result.
+The structural findings are in [design-review/REPORT.md](design-review/REPORT.md). The later visual calibration is in [research/visual-calibration.md](research/visual-calibration.md), with browser captures under `design-review/calibration-*`. The crafted calibration won because it preserves the register's scan speed while giving the index one quiet authored surface. Production baseline captures and machine-readable browser results are under `design-review/production-slice`.
 
 ## Planned production routes
 
@@ -57,7 +58,7 @@ The complete findings are in [design-review/REPORT.md](design-review/REPORT.md).
 - `/work/ayam-kalintang`
 - framework 404, sitemap, robots, and metadata endpoints
 
-The planned stack is Next.js App Router, strict TypeScript, and Tailwind CSS. The project does not require a CMS, database, authentication, global state library, component framework, animation library, or client-side data fetching.
+The baseline uses Next.js 16.3.4 App Router, React 19.2.8, strict TypeScript 6.0.3, and Tailwind CSS 4.3.3. It includes a dependency-free theme switch that follows the system setting on first visit and persists a manual choice. The project does not require a CMS, database, authentication, global state library, component framework, animation library, or client-side data fetching.
 
 ## Confirmed public contact
 
@@ -70,7 +71,7 @@ The planned stack is Next.js App Router, strict TypeScript, and Tailwind CSS. Th
 
 - final résumé PDF;
 - clean local captures for KAIROS and Ayam Kalintang;
-- optional safe N.A.R.A. capture;
+- optional safe Aether3D and N.A.R.A. captures;
 - final domain and deployment credentials.
 
 Local source checkouts, security-sensitive notes, temporary prototypes, tool caches, and workflow configuration are intentionally excluded from version control. They are not required to implement the portfolio from this handoff.

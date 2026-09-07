@@ -1,0 +1,140 @@
+{
+  "pages": [
+    {
+      "viewport": {
+        "width": 320,
+        "height": 800
+      },
+      "status": 200,
+      "clientWidth": 320,
+      "scrollWidth": 320,
+      "overflowing": [],
+      "fontStatus": "loaded",
+      "fontLoaded": true,
+      "theme": "light",
+      "indexBottom": 565.5,
+      "kairosTop": 649.40625,
+      "text": "Skip to content\nVA\nWork\nValensius Alven\n\nInformatics Engineering student at Universitas Padjadjaran.\n\nSoftware, AI systems and student-led project work.\n\nGitHub\nLinkedIn\nKAIROS\nTeam Lead · COMPFEST 18\nAyam Kalintang\nReal business · completed July 2026\nThe Colors of MIPA\n9 programs · 30+ contributors\nSelected work\nKAIROS\n\nDispatcher decision-support for reviewing pickup promises within limited human review capacity.\n\nTeam Lead\n\nCOMPFEST 18 AI Innovation Challenge, 2026\n\nCatBoost ranking evaluated on public LaDe pickup data\nPersonal work on input validation, invariant tests and reproducibility records\nDispatcher retains operational decisions\n\nLocal competition MVP; built with a team.\n\nInspect KAIROS source\nAyam Kalintang\n\nSelf-order kiosk and staff tools built for Ayam Kalintang, a local culinary business.\n\nFull-Stack Engineer · Deputy Team Lead\n\nBakti BCA · Jan–Jul 2026 · completed July 2026",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "status": 200,
+      "clientWidth": 375,
+      "scrollWidth": 375,
+      "overflowing": [],
+      "fontStatus": "loaded",
+      "fontLoaded": true,
+      "theme": "light",
+      "indexBottom": 572.515625,
+      "kairosTop": 656.421875,
+      "text": "Skip to content\nVA\nWork\nValensius Alven\n\nInformatics Engineering student at Universitas Padjadjaran.\n\nSoftware, AI systems and student-led project work.\n\nGitHub\nLinkedIn\nKAIROS\nTeam Lead · COMPFEST 18\nAyam Kalintang\nReal business · completed July 2026\nThe Colors of MIPA\n9 programs · 30+ contributors\nSelected work\nKAIROS\n\nDispatcher decision-support for reviewing pickup promises within limited human review capacity.\n\nTeam Lead\n\nCOMPFEST 18 AI Innovation Challenge, 2026\n\nCatBoost ranking evaluated on public LaDe pickup data\nPersonal work on input validation, invariant tests and reproducibility records\nDispatcher retains operational decisions\n\nLocal competition MVP; built with a team.\n\nInspect KAIROS source\nAyam Kalintang\n\nSelf-order kiosk and staff tools built for Ayam Kalintang, a local culinary business.\n\nFull-Stack Engineer · Deputy Team Lead\n\nBakti BCA · Jan–Jul 2026 · completed July 2026",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": {
+        "width": 768,
+        "height": 900
+      },
+      "status": 200,
+      "clientWidth": 768,
+      "scrollWidth": 768,
+      "overflowing": [],
+      "fontStatus": "loaded",
+      "fontLoaded": true,
+      "theme": "light",
+      "indexBottom": 546.21875,
+      "kairosTop": 644.125,
+      "text": "Skip to content\nVA\nWork\nValensius Alven\n\nInformatics Engineering student at Universitas Padjadjaran.\n\nSoftware, AI systems and student-led project work.\n\nGitHub\nLinkedIn\nKAIROS\nTeam Lead · COMPFEST 18\nAyam Kalintang\nReal business · completed July 2026\nThe Colors of MIPA\n9 programs · 30+ contributors\nSelected work\nKAIROS\n\nDispatcher decision-support for reviewing pickup promises within limited human review capacity.\n\nTeam Lead\n\nCOMPFEST 18 AI Innovation Challenge, 2026\n\nCatBoost ranking evaluated on public LaDe pickup data\nPersonal work on input validation, invariant tests and reproducibility records\nDispatcher retains operational decisions\n\nLocal competition MVP; built with a team.\n\nInspect KAIROS source\nAyam Kalintang\n\nSelf-order kiosk and staff tools built for Ayam Kalintang, a local culinary business.\n\nFull-Stack Engineer · Deputy Team Lead\n\nBakti BCA · Jan–Jul 2026 · completed July 2026",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "status": 200,
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "overflowing": [],
+      "fontStatus": "loaded",
+      "fontLoaded": true,
+      "theme": "light",
+      "indexBottom": 320,
+      "kairosTop": 538.375,
+      "text": "Skip to content\nVA\nWork\nValensius Alven\n\nInformatics Engineering student at Universitas Padjadjaran.\n\nSoftware, AI systems and student-led project work.\n\nGitHub\nLinkedIn\nKAIROS\nTeam Lead · COMPFEST 18\nAyam Kalintang\nReal business · completed July 2026\nThe Colors of MIPA\n9 programs · 30+ contributors\nSelected work\nKAIROS\n\nDispatcher decision-support for reviewing pickup promises within limited human review capacity.\n\nTeam Lead\n\nCOMPFEST 18 AI Innovation Challenge, 2026\n\nCatBoost ranking evaluated on public LaDe pickup data\nPersonal work on input validation, invariant tests and reproducibility records\nDispatcher retains operational decisions\n\nLocal competition MVP; built with a team.\n\nInspect KAIROS source\nAyam Kalintang\n\nSelf-order kiosk and staff tools built for Ayam Kalintang, a local culinary business.\n\nFull-Stack Engineer · Deputy Team Lead\n\nBakti BCA · Jan–Jul 2026 · completed July 2026",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "failedRequests": []
+    }
+  ],
+  "theme": {
+    "initial": {
+      "theme": "dark",
+      "checked": "true",
+      "label": "Switch to light mode"
+    },
+    "afterToggle": {
+      "theme": "light",
+      "checked": "false",
+      "label": "Switch to dark mode",
+      "stored": "light"
+    },
+    "afterReload": {
+      "theme": "light",
+      "checked": "false",
+      "label": "Switch to dark mode"
+    }
+  },
+  "keyboard": [
+    {
+      "tag": "A",
+      "text": "Skip to content",
+      "label": null
+    },
+    {
+      "tag": "A",
+      "text": "VA",
+      "label": "Valensius Alven, home"
+    },
+    {
+      "tag": "A",
+      "text": "Work",
+      "label": null
+    },
+    {
+      "tag": "BUTTON",
+      "text": "",
+      "label": "Switch to dark mode"
+    },
+    {
+      "tag": "A",
+      "text": "GitHub",
+      "label": null
+    },
+    {
+      "tag": "A",
+      "text": "LinkedIn",
+      "label": null
+    },
+    {
+      "tag": "A",
+      "text": "KAIROSTeam Lead · COMPFEST 18",
+      "label": null
+    },
+    {
+      "tag": "A",
+      "text": "Ayam KalintangReal business · completed July 2026",
+      "label": null
+    }
+  ]
+}
