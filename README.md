@@ -51,6 +51,16 @@ Directions A and B were rendered with identical content at 1440×900, 375×812, 
 
 The structural findings are in [design-review/REPORT.md](design-review/REPORT.md). The later visual calibration is in [research/visual-calibration.md](research/visual-calibration.md), with browser captures under `design-review/calibration-*`. The crafted calibration won because it preserves the register's scan speed while giving the index one quiet authored surface. Production baseline captures and machine-readable browser results are under `design-review/production-slice`.
 
+
+The editable Figma review workspace keeps the captured code baseline beside the proposed full homepage:
+
+- [current desktop baseline](https://www.figma.com/design/ih9JNBzuqdH9hsdLeWVkcF/Untitled?node-id=19-2)
+- [proposed desktop light](https://www.figma.com/design/ih9JNBzuqdH9hsdLeWVkcF/Untitled?node-id=46-2)
+- [proposed mobile light](https://www.figma.com/design/ih9JNBzuqdH9hsdLeWVkcF/Untitled?node-id=48-2)
+- [review decisions](https://www.figma.com/design/ih9JNBzuqdH9hsdLeWVkcF/Untitled?node-id=36-2)
+
+The proposed frames are not implemented. `research/DESIGN_CODE_DRIFT.md` and `research/FIGMA_DESIGN_DELTA.md` record the open contract decisions.
+
 ## Planned production routes
 
 - `/`
