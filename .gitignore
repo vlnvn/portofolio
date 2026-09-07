@@ -1,0 +1,20 @@
+# Local research checkouts are evidence inputs, not portfolio source or public assets.
+/research/repos/
+/research/skills/
+/research/private/
+/research/WORKFLOW.md
+/research/SECURITY-NOTE.md
+/research/design-divergence.md
+/prototypes/
+/design-review/source-pre/
+/design-review/**/pre-*.png
+/design-review/pre-visibility.json
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+.vercel/
+playwright-report/
+test-results/
+*.tsbuildinfo
