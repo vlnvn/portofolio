@@ -1,5 +1,7 @@
 # V3 production gate
 
+> Historical baseline notice: this report predates the later human-approved Kinetic Lightfield/Aperture Rig runtime. Use `DESIGN.md` for current visual/runtime authority and `research/V3_1_RC_ACCEPTANCE.md` for the current release gate.
+
 Status: production candidate built locally on 10 September 2026. Deployment remains intentionally stopped for final human review.
 
 ## Implementation
