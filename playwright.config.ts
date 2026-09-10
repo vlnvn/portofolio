@@ -4,10 +4,10 @@ const remoteBaseUrl = process.env.PLAYWRIGHT_BASE_URL;
 
 export default defineConfig({
   testDir: "./tests",
-  fullyParallel: true,
+  fullyParallel: !process.env.CI,
   forbidOnly: true,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
     ? [["line"], ["html", { open: "never" }]]
     : [["line"]],
