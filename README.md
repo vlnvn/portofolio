@@ -5,7 +5,7 @@ Production candidate for Valensius Alven, an Informatics Engineering student at 
 ## Run locally
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 

@@ -1,91 +1,155 @@
-# Production design contract
+﻿# Production design contract — V2.3.1
 
-Status: locked 7 September 2026 after browser calibration. Direction B uses a compact project register with a crafted but quiet visual system.
+Status: locked 7 September 2026. This document describes the current implemented design only. Do not use it as a redesign brief.
 
-## Design principle
+## Design name
 
-Evidence should be faster to find than decoration. One quiet index surface gives the opening an authored shape; project identity comes from real artifacts, factual roles, and different evidence rhythms.
-
-## Page composition
-
-Header → split introduction and project index → featured project rows → supporting-work rows → contact/footer. The first featured row begins in the initial desktop and mobile viewport. Long reasoning stays on the two detail routes.
-
-## Grid
-
-- Shell maximum: `1160px`; horizontal padding `20px` mobile, `32px` tablet, `40px` desktop.
-- Desktop opening: `5/7` columns. Project rows: `3/7/2` columns with `32px` gutters.
-- At `≤900px`, project rows become two columns: identity `minmax(180px, 0.75fr)` and evidence `1.5fr`; source joins evidence.
-- At `≤680px`, use one column in semantic order. Do not preserve empty desktop tracks.
+Kinetic Blueprint
 
 ## Typography
 
-- Family: IBM Plex Sans, locally hosted Latin files. Use 400 for prose, 500 for names/links, 600 for roles and short evidence labels.
-- Name: `clamp(2.5rem, 5vw, 4rem)`, weight 500, line-height `0.98`, tracking `-0.035em`.
-- Section/project headings: `clamp(1.65rem, 2.4vw, 2.25rem)`, weight 500, line-height `1.08`.
-- Body: `clamp(1rem, 0.35vw + .92rem, 1.125rem)`, line-height `1.55`.
-- Metadata: `0.9rem–1rem`, line-height `1.45`; never use tiny uppercase eyebrows.
-- Prose line length: `48–68ch`; evidence lines may be shorter.
+- Display: Sora Light / Regular (Google Fonts, preloaded)
+- Body, evidence, navigation, captions, actions: Manrope Regular / SemiBold (Google Fonts, preloaded)
+- Project titles remain in Sora; not ExtraBold
 
-## Color
+## Color system
 
-Light tokens: background `#f4f8f7`, surface `#e9f2ef`, text `#10211e`, muted `#536661`, rule `#c7d6d2`, accent `#006f69`, focus `#007d76`.
+### Light mode — cold slate / dusty-blue
 
-Dark tokens: background `#07120f`, surface `#102823`, text `#edf7f3`, muted `#a9bbb5`, rule `#28423b`, accent `#72d8cf`, focus `#8ce9e0`.
+| Token | Value |
+|---|---|
+| Background | `#F3F6FB` |
+| Surface | `#E6ECF6` |
+| Text | `#131B2A` |
+| Muted | `#5C6678` |
+| Rule | `#C5CFDF` |
+| Slate accent | `#283F62` |
+| Interactive | `#1757AF` |
+| Energy | `#2F74E8` |
+| Ice | `#DCEAFF` |
+| Focus | `#0B57D0` |
 
-The accent marks links, focus and the active theme state. Tune themes independently. Text and controls must meet WCAG 2.2 AA; focus indicators must reach 3:1 against adjacent colors. Theme browser chrome and text selection should use the active tokens.
+Contrast (text against background/surface): 15.92:1 / 14.53:1. Muted: 5.35:1 / 4.88:1. All links and focus meet WCAG 2.2 AA.
 
-## Spacing
+### Dark mode — midnight / navy
 
-Use `4, 8, 12, 16, 24, 32, 48, 64, 88px`. Opening padding is `48–64px` top and `64–88px` bottom on desktop, `32px` top and `48px` bottom on mobile. Project rows use `40–64px` vertical spacing.
+| Token | Value |
+|---|---|
+| Background | `#070C16` |
+| Surface | `#0E1522` |
+| Text | `#E8EDF5` |
+| Muted | `#9EABC0` |
+| Rule | `#333F54` |
+| Accent | `#94ADD1` |
+| Interactive | `#8CB6FF` |
+| Energy | `#70A4FF` |
+| Ice | `#243A5A` |
+| Focus | `#A8C7FF` |
 
-## Rules, radius and shadows
+Project screenshots keep their source colors.
 
-Use one-pixel rules for header, project boundaries and index rows. Avoid duplicate separators. Structural containers remain square. Radius is `10px` for the index surface and real media crop; the theme switch may be pill-shaped because its track communicates a binary state. Shadows default to none. One low-spread shadow may separate a real artifact from the page when its edge is otherwise unclear.
+## Portrait
 
-## Project-specific composition
+Source: `IMG_6397.JPG.jpeg`. Final treatment: `design-review/v2-3/portrait/6397-waist-up-environmental-v231.jpg` — a truthful waist-up environmental crop. No background removal, no generative alteration, no identity/clothing/skin manipulation. No public filename or internal portrait label is exposed. Face remains clear at 1440, 1024, 768, 430, 375, and 320px.
 
-### KAIROS
+Production file: `public/media/portrait/valensius-alven.jpg`
 
-Column one: project name and problem. Column two: Team Lead, competition context, three evidence points, explicit team/MVP boundary, source, then one real review-queue capture if available. Never render a placeholder in production.
+## Page composition
 
-### Ayam Kalintang
+### Desktop (≥1024px)
 
-Column one: project name and business problem. Column two: Full-Stack Engineer · Deputy Team Lead, dates/completion, owned kiosk/admin/customization work, receipt/UAT revisions, source, then a real kiosk crop. Detail-only artifacts cover admin and receipt workflows.
+Asymmetric hero: portrait occupies right column; name, discipline, scope and actions on the left. Six project chapters follow as full-width sections in alternating layout (text-left, media-left, split, community). Persistent Signal Form layer is positioned behind/around content.
 
-### The Colors of MIPA
+### Mobile (<768px)
 
-Keep full featured-row weight. Put role and BEM context before `30+ contributors across all 9 programs`; set that line one typographic step above body text. Follow with `target 200 likes; result 1,002` and the Reel link. No decorative media is required.
+Calmer semantic single-column composition. Name, portrait, scope, actions, navigation. No decorative project index beneath the hero. Contact email uses a responsive display size that keeps the full address intact at 430, 375, 360, and 320px.
 
-### Aether3D
+## Theme control
 
-Use a short supporting row before N.A.R.A. State that it is a personal AI/3D experiment using Gemini to request Blender Python and a simplified browser preview. If a real browser capture is used, label the preview as a simplified proxy. Homepage only.
+44px control. Glyph: centered eclipse/aperture — an outer material disc with a concentric opening. Not a sun/moon pair. Implemented as a semantic `button` with `role="switch"`, `aria-checked`, accessible label, system-preference support, visible focus ring, and `localStorage` persistence.
 
-### N.A.R.A.
+## Navigation
 
-Use a short supporting row. Keep the exact role, owned interface flows, recommendation mapping/persistence, teammate AI-engine boundary and source visible. Media is optional.
+Adaptive navigation bar. Persistent across scroll. Tracks the visible project chapter via IntersectionObserver. Shows `00 / 06 INTRO` through `06 / 06 N.A.R.A.`. Chapter links and Contact are reachable from the nav. Mobile shows a compact current-chapter indicator.
 
-## Media treatment
+## Six project chapters — equal dignity
 
-Use only real project artifacts. Homepage crops are shallow, without browser/device frames, and must keep task-defining UI labels legible. Historical or proxy states receive plain captions. If a safe artifact is unavailable, omit its space.
+| # | Project | Layout |
+|---|---|---|
+| 01 | KAIROS | text-left |
+| 02 | Ayam Kalintang | media-left |
+| 03 | SAMBUT | split |
+| 04 | The Colors of MIPA | community |
+| 05 | Aether3D | media-left |
+| 06 | N.A.R.A. | text-left |
 
-## Links
+All six chapters use real project media as primary visual evidence. No placeholder images.
 
-Use descriptive underlined text with `4px` underline offset. Hover thickens the underline. Focus uses a visible `2px` outline with `4px` offset. Place source links directly after the evidence they validate. Interactive targets are at least `44×44px` when presented as controls.
+### Media captions (exact)
 
-## Theme and motion
+- KAIROS: `Local replay · public LaDe pickup data`
+- Ayam Kalintang: `Kiosk interface · July 2026`
+- SAMBUT: `Patient terminal`; `Staff terminal`
+- The Colors of MIPA: `Instagram Reel`
+- Aether3D: `Simplified browser preview / proxy`
+- N.A.R.A.: `Dashboard`; `Onboarding flow`
 
-The two-state theme button uses an inline sun, a compact track/thumb and an inline moon. It is a semantic `button` with `role="switch"`, current `aria-checked`, and a changing accessible label. The first visit follows `prefers-color-scheme`; a manual choice persists in local storage. Apply the theme before paint to prevent a wrong-theme flash. Use no theme package.
+## Signal Form
 
-Approved motion: `120–180ms` color and thumb-position transitions on the theme control and link state changes. No entrance or scroll animation. Disable nonessential transitions under `prefers-reduced-motion`.
+One persistent actor. Seven states (00-06) driven by scroll position. One mutable ribbon BufferGeometry, three planes, five nodes. Lazy-loaded only on capable viewports at >=700px initial mount. `frameloop="demand"`. Stops invalidating after interpolation settles. No textures, no post-processing.
 
-## Mobile transformation
+Mobile, reduced-motion, failed import, WebGL unavailability, and context loss all select the deterministic SVG poster.
 
-Keep the name, two factual lines and the complete three-project index in the first viewport at 320–430px. Keep `Work` in the header; contact may move to the footer. Collapse rows to project → role/context → evidence → source → media. Body text stays at least `16px`; primary reading copy targets `17px`.
+## Reduced-motion fallback
 
-## Accessibility
+`prefers-reduced-motion: reduce` -> deterministic SVG poster at all viewport sizes. No WebGL load attempted.
 
-Use landmarks, one `h1`, ordered headings, a keyboard-visible skip link, native anchors/buttons, visible focus, useful alt text, 44px control targets, 200% zoom resilience, adequate contrast in both themes, reduced-motion support and no horizontal overflow at 320px. The theme switch must announce its state and label without relying on its icons.
+## WebGL progressive enhancement
 
-## Anti-patterns
+Capability check at mount: `canvas.getContext("webgl2") || canvas.getContext("webgl")`. If null, poster is shown. Resize events do not re-evaluate eligibility after mount (intentional: initial-capability-based, safe, prevents mid-session context churn).
 
-No decorative gradients, glass, glowing borders, generic cards, badges, bento layout, stock imagery, fake interfaces, decorative code, technology wall, oversized hero, repeated eyebrow labels, arbitrary numbering, automated social embed or motion on scroll. Do not repeat the same container geometry for every project. Do not use theme styling to imitate another product brand.
+## Accessibility requirements
+
+- One `<h1>` per page
+- Ordered heading hierarchy
+- Keyboard-visible skip link
+- All nav links and controls reachable and focusable by keyboard
+- Visible 2px focus outline on all interactive elements
+- 44px minimum touch/click target for controls
+- Axe zero violations (Chromium, light and dark)
+- 200% CSS zoom + WCAG text spacing: no horizontal overflow
+- 320px minimum viewport: no horizontal overflow
+- `prefers-color-scheme` respected on first visit
+
+## Anti-AI-slop constraints
+
+The following are permanently banned from this design:
+
+- Purple/cyan decorative gradients
+- Glassmorphism or frosted-glass panels
+- Particle systems or canvas decorations
+- Generic floating orbs or cursor trails
+- Repeated fade-up entrance animations
+- Skill pills, technology walls, or badge grids
+- Bento card layouts
+- Glowing or animated borders
+- Decorative code blocks
+- Fake metrics or unverified engagement figures
+- Generic marketing copy
+
+## SEO and meta
+
+- Unique title and description per route
+- Open Graph / Twitter card metadata
+- Generated OG image
+- `sitemap.xml` and `robots.txt` cover all public routes
+- `NEXT_PUBLIC_SITE_URL` must be set to the final HTTPS origin before production deployment
+
+## Security headers (production)
+
+`Content-Security-Policy`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Permissions-Policy`. Preview deployments additionally send `X-Robots-Tag: noindex, nofollow`.
+
+## Final Figma reference
+
+Page: `190:281` -- `V2.3.1 / FINAL FREEZE`
+Desktop light: `190:282` / Desktop dark: `190:477` / 1024: `190:673` / 768: `190:825` / 430: `190:977` / 375: `190:1130` / 320: `190:1283`

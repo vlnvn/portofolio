@@ -25,3 +25,14 @@ test("200 percent zoom and WCAG text spacing retain reflow",async({page},testInf
 test("homepage scroll produces no console errors or failed same-origin requests",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","network audit runs once");const errors:string[]=[];page.on("console",message=>{if(message.type()==="error")errors.push(message.text())});page.on("requestfailed",request=>{if(new URL(request.url()).origin==="http://127.0.0.1:3010")errors.push(`${request.url()} ${request.failure()?.errorText}`)});await page.goto("/");const height=await page.evaluate(()=>document.documentElement.scrollHeight);for(let y=0;y<height;y+=700){await page.evaluate(top=>scrollTo(0,top),y);await page.waitForTimeout(40);}expect(errors).toEqual([]);});
 
 for(const width of [360,390,1280])test(`${width}px risk-sample has no horizontal overflow`,async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","responsive matrix runs once");await page.setViewportSize({width,height:800});await page.goto("/");await page.evaluate(()=>document.fonts.ready);expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);});
+
+test("natural scroll updates active chapter and reverse scroll converges",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","scroll-observer test runs once per browser family");await page.goto("/");
+  await page.evaluate(()=>document.getElementById("kairos")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.getByRole("link",{name:/01 KAIROS/}).getAttribute("aria-current"),{timeout:3000}).toBe("location");
+  await page.evaluate(()=>document.getElementById("sambut")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.getByRole("link",{name:/03 SAMBUT/}).getAttribute("aria-current"),{timeout:3000}).toBe("location");
+  await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.getByRole("link",{name:/06 N\.A\.R\.A\./}).getAttribute("aria-current"),{timeout:3000}).toBe("location");
+  await page.evaluate(()=>document.getElementById("kairos")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.getByRole("link",{name:/01 KAIROS/}).getAttribute("aria-current"),{timeout:3000}).toBe("location");
+});
