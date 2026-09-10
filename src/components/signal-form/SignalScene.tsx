@@ -1,77 +1,97 @@
 "use client";
+
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { heroSignalState } from "./states";
+import { apertureRigState } from "./states";
 
-type Tilt = { x: number; y: number };
+type Tilt={x:number;y:number};
 
-function Sculpture({ tilt, dark }: { tilt:Tilt; dark:boolean }) {
-  const group=useRef<THREE.Group>(null);
-  const currentTilt=useRef({x:0,y:0});
+function ResponsiveLights({tilt,dark}:{tilt:Tilt;dark:boolean}){
+  const key=useRef<THREE.DirectionalLight>(null);
+  const fill=useRef<THREE.DirectionalLight>(null);
+  const target=useRef(tilt);
+  const current=useRef({x:0,y:0});
+  const {invalidate}=useThree();
+  useEffect(()=>{target.current=tilt;invalidate();},[tilt,invalidate]);
+  useFrame(()=>{
+    const dx=target.current.x-current.current.x;
+    const dy=target.current.y-current.current.y;
+    current.current.x+=dx*.16;current.current.y+=dy*.16;
+    if(key.current)key.current.position.set(-2.6+current.current.x*1.15,3.4-current.current.y*.8,4.6+current.current.x*.32);
+    if(fill.current)fill.current.position.set(3.2-current.current.x*.75,-1.4+current.current.y*.55,2.4-current.current.y*.28);
+    if(Math.abs(dx)>.001||Math.abs(dy)>.001)invalidate();
+  });
+  return <><ambientLight intensity={dark?.72:1.02}/><directionalLight ref={key} position={[-2.6,3.4,4.6]} intensity={dark?2.35:2.7}/><directionalLight ref={fill} position={[3.2,-1.4,2.4]} intensity={dark?.62:.78}/></>;
+}
+
+function ApertureRig({tilt,dark}:{tilt:Tilt;dark:boolean}){
+  const rig=useRef<THREE.Group>(null);
+  const ringRefs=useRef<(THREE.Mesh|null)[]>([]);
+  const bladeRefs=useRef<(THREE.Mesh|null)[]>([]);
+  const nodeRefs=useRef<(THREE.Mesh|null)[]>([]);
   const targetTilt=useRef(tilt);
+  const currentTilt=useRef({x:0,y:0});
+  const introStart=useRef<number|null>(null);
   const {invalidate,gl}=useThree();
-  const ribbonGeometry=useMemo(()=>{
-    const geometry=new THREE.BufferGeometry();
-    const positions=new Float32Array(66*2*3);
-    const indices:number[]=[];
-    const curve=new THREE.CatmullRomCurve3(heroSignalState.ribbon.map(point=>new THREE.Vector3().fromArray(point)));
-    for(let i=0;i<65;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
-    const attribute=new THREE.BufferAttribute(positions,3);
-    for(let i=0;i<66;i++){
-      const u=i/65;
-      const center=curve.getPoint(u);
-      const tangent=curve.getTangent(u).normalize();
-      const side=new THREE.Vector3(-tangent.y,tangent.x,.16).normalize();
-      const width=.065+Math.sin(Math.PI*u)*.12;
-      for(let edge=0;edge<2;edge++){
-        const vertex=center.clone().addScaledVector(side,edge?width:-width);
-        attribute.setXYZ(i*2+edge,vertex.x,vertex.y,vertex.z);
-      }
-    }
-    geometry.setAttribute("position",attribute);
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-    return geometry;
-  },[]);
-  const slabGeometry=useMemo(()=>new THREE.BoxGeometry(1,1,1),[]);
+  const bladeGeometry=useMemo(()=>new THREE.BoxGeometry(1,1,1),[]);
   const nodeGeometry=useMemo(()=>new THREE.SphereGeometry(.085,18,12),[]);
 
   useEffect(()=>{targetTilt.current=tilt;invalidate();},[tilt,invalidate]);
 
-  useFrame(()=>{
-    const object=group.current;
-    if(!object)return;
-    const targetX=-targetTilt.current.y*.055;
-    const targetY=targetTilt.current.x*.08;
+  useFrame(({clock})=>{
+    if(introStart.current===null)introStart.current=clock.elapsedTime;
+    const raw=Math.min(1,(clock.elapsedTime-introStart.current)/.88);
+    const settle=1-Math.pow(1-raw,3);
+    const targetX=-targetTilt.current.y*.12;
+    const targetY=targetTilt.current.x*.15;
     const dx=targetX-currentTilt.current.x;
     const dy=targetY-currentTilt.current.y;
-    if(Math.abs(dx)>.0004||Math.abs(dy)>.0004){
-      currentTilt.current.x+=dx*.16;
-      currentTilt.current.y+=dy*.16;
-      object.rotation.x=-.06+currentTilt.current.x;
-      object.rotation.y=.08+currentTilt.current.y;
-      invalidate();
-    }else{
-      currentTilt.current.x=targetX;
-      currentTilt.current.y=targetY;
-      object.rotation.x=-.06+targetX;
-      object.rotation.y=.08+targetY;
-    }
+    currentTilt.current.x+=dx*.14;currentTilt.current.y+=dy*.14;
+
+    ringRefs.current.forEach((mesh,index)=>{
+      if(!mesh)return;
+      const ring=apertureRigState.rings[index];
+      const scale=.7+settle*.3;
+      const depthRate=.28+index*.18;
+      mesh.scale.setScalar(scale);
+      mesh.position.set(ring.position[0]+currentTilt.current.y*depthRate,ring.position[1]+(1-settle)*(index%2?-.26:.26)+currentTilt.current.x*depthRate,ring.position[2]);
+      mesh.rotation.set(ring.rotation[0]+(1-settle)*(.5-index*.16)+currentTilt.current.x*depthRate,ring.rotation[1]+(1-settle)*(.42-index*.12)+currentTilt.current.y*depthRate,ring.rotation[2]+(1-settle)*(index%2?-.46:.5));
+    });
+    bladeRefs.current.forEach((mesh,index)=>{
+      if(!mesh)return;
+      const blade=apertureRigState.blades[index];
+      const originScale=.32+.68*settle;
+      const depthRate=.34+index*.12;
+      mesh.position.set(blade.position[0]*originScale+currentTilt.current.y*depthRate,blade.position[1]*originScale-currentTilt.current.x*depthRate,blade.position[2]*settle+currentTilt.current.y*.12);
+      mesh.rotation.set(blade.rotation[0]+(1-settle)*.7-currentTilt.current.x*.32,blade.rotation[1]-(1-settle)*.55+currentTilt.current.y*.36,blade.rotation[2]+(1-settle)*(index-1)*.7);
+      mesh.scale.set(blade.scale[0]*settle,blade.scale[1]*settle,blade.scale[2]*settle);
+    });
+    nodeRefs.current.forEach((mesh,index)=>{
+      if(!mesh)return;
+      const node=apertureRigState.nodes[index];
+      const spread=.42+.58*settle;
+      const depthRate=.08+index*.018;
+      mesh.position.set(node[0]*spread+currentTilt.current.y*depthRate,node[1]*spread-currentTilt.current.x*depthRate,node[2]*settle+currentTilt.current.y*depthRate);
+      mesh.scale.setScalar(.35+.65*settle);
+    });
+    if(rig.current){rig.current.rotation.x=-.1+currentTilt.current.x;rig.current.rotation.y=.14+currentTilt.current.y;}
+
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
     document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
+    if(raw<1||Math.abs(dx)>.0005||Math.abs(dy)>.0005)invalidate();
   });
 
-  const blue=dark?"#70A4FF":"#2F74E8";
-  const pale=dark?"#243A5A":"#DCEAFF";
-  return <group ref={group} rotation={[-.06,.08,0]}>
-    <mesh geometry={ribbonGeometry}><meshStandardMaterial color={blue} roughness={.38} metalness={.06} side={THREE.DoubleSide}/></mesh>
-    {heroSignalState.slabs.map((slab,index)=><mesh key={index} geometry={slabGeometry} position={slab.position} rotation={slab.rotation} scale={slab.scale}><meshStandardMaterial color={index===1?pale:blue} roughness={.42} metalness={.04} transparent opacity={index===1?.78:.92}/></mesh>)}
-    {heroSignalState.nodes.map((position,index)=><mesh key={index} geometry={nodeGeometry} position={position}><meshStandardMaterial color={index===2?pale:blue} roughness={.3} metalness={.08}/></mesh>)}
+  const energy=dark?"#70A4FF":"#2F74E8";
+  const ice=dark?"#243A5A":"#DCEAFF";
+  return <group ref={rig} rotation={[-.1,.14,0]}>
+    {apertureRigState.rings.map((ring,index)=><mesh key={`ring-${index}`} ref={element=>{ringRefs.current[index]=element}} position={ring.position} rotation={ring.rotation}><torusGeometry args={[ring.radius,ring.tube,12,72,ring.arc]}/><meshStandardMaterial color={index===1?ice:energy} roughness={.34} metalness={.05}/></mesh>)}
+    {apertureRigState.blades.map((blade,index)=><mesh key={`blade-${index}`} ref={element=>{bladeRefs.current[index]=element}} geometry={bladeGeometry} position={blade.position} rotation={blade.rotation} scale={blade.scale}><meshStandardMaterial color={index===1?ice:energy} roughness={.38} metalness={.04}/></mesh>)}
+    {apertureRigState.nodes.map((position,index)=><mesh key={`node-${index}`} ref={element=>{nodeRefs.current[index]=element}} geometry={nodeGeometry} position={position}><meshStandardMaterial color={index===2?ice:energy} roughness={.28} metalness={.06}/></mesh>)}
   </group>;
 }
 
-export default function SignalScene({ tilt, dark, onLost }: { tilt:Tilt; dark:boolean; onLost:()=>void }) {
-  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.6],fov:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event:Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><ambientLight intensity={dark?.82:1.08}/><directionalLight position={[-2.4,3.2,4.8]} intensity={dark?2.2:2.7}/><directionalLight position={[3,-1.5,2]} intensity={dark?.65:.82}/><Sculpture tilt={tilt} dark={dark}/></Canvas>;
+export default function SignalScene({tilt,dark,onLost}:{tilt:Tilt;dark:boolean;onLost:()=>void}){
+  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.1],fov:38}} gl={{antialias:true,alpha:true,powerPreference:"low-power"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event:Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><ResponsiveLights tilt={tilt} dark={dark}/><ApertureRig tilt={tilt} dark={dark}/></Canvas>;
 }

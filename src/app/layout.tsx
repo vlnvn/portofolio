@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: { title: "Valensius Alven", description, type: "website", locale: "en_US" },
   twitter: { card: "summary_large_image", title: "Valensius Alven", description },
 };
-export const viewport: Viewport = { colorScheme: "light dark", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#F3F6FB" }, { media: "(prefers-color-scheme: dark)", color: "#070C16" }] };
+export const viewport: Viewport = { colorScheme: "light dark", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#E9EFF6" }, { media: "(prefers-color-scheme: dark)", color: "#070C16" }] };
 const themeScript = `(function(){try{var s=localStorage.getItem('portfolio-theme');var t=s==='light'||s==='dark'?s:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})()`;
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="en" suppressHydrationWarning><head><script dangerouslySetInnerHTML={{ __html: themeScript }} /></head><body className={`${manrope.variable} ${sora.variable}`}>{children}</body></html>;

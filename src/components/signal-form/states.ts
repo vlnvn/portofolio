@@ -1,15 +1,19 @@
-export type HeroSignalState = {
-  ribbon: [number, number, number][];
-  slabs: { position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number] }[];
-  nodes: [number, number, number][];
+export type ApertureRigState = {
+  rings: { radius:number; tube:number; arc:number; position:[number,number,number]; rotation:[number,number,number] }[];
+  blades: { position:[number,number,number]; rotation:[number,number,number]; scale:[number,number,number] }[];
+  nodes: [number,number,number][];
 };
 
-export const heroSignalState: HeroSignalState = {
-  ribbon: [[-2.9,-.24,-.35],[-1.55,.72,.28],[-.2,-.3,.62],[1.25,.12,-.12],[2.85,.62,.3]],
-  slabs: [
-    { position:[-1.65,.34,.55], rotation:[-.38,.52,-.24], scale:[1.15,.42,.12] },
-    { position:[.08,-.52,-.15], rotation:[.34,-.44,.36], scale:[1.08,.4,.12] },
-    { position:[1.72,.42,.38], rotation:[-.26,.62,-.2], scale:[1.02,.38,.12] },
+export const apertureRigState:ApertureRigState={
+  rings:[
+    {radius:1.2,tube:.035,arc:Math.PI*2,position:[0,0,.04],rotation:[1.13,.2,.18]},
+    {radius:.82,tube:.048,arc:Math.PI*2,position:[.05,-.02,.34],rotation:[.72,-.48,-.32]},
+    {radius:1.48,tube:.026,arc:Math.PI*1.48,position:[-.04,.08,-.34],rotation:[1.42,.5,.74]},
   ],
-  nodes: [[-2.45,-.02,.18],[-1.18,.54,.68],[.04,-.22,.78],[1.18,.18,-.02],[2.42,.54,.5]],
+  blades:[
+    {position:[-1.08,.5,.48],rotation:[-.32,.58,-.5],scale:[.92,.34,.11]},
+    {position:[.18,-1.02,.06],rotation:[.48,-.34,.72],scale:[1.02,.36,.11]},
+    {position:[1.1,.42,-.18],rotation:[-.2,.7,.4],scale:[.88,.32,.11]},
+  ],
+  nodes:[[-1.5,-.46,.18],[-.7,1.15,.5],[.1,.76,-.22],[.82,-.76,.66],[1.48,.38,.12]],
 };
