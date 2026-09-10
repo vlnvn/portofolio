@@ -37,9 +37,11 @@
   ],
   "exclude": [
     "node_modules",
-    "research",
-    "prototypes",
-    "calibrations",
-    "design-review"
+    "research/**",
+    "prototypes/**",
+    "calibrations/**",
+    "design-review/**",
+    "experiments/**",
+    ".tmp-tools/**"
   ]
 }

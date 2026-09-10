@@ -21,3 +21,6 @@ test-results/
 
 /calibrations/
 /.impeccable/
+
+# Generated browser-review captures
+/design-review/v3-production/
