@@ -36,3 +36,15 @@ test("natural scroll updates active chapter and reverse scroll converges",async(
   await page.evaluate(()=>document.getElementById("kairos")?.scrollIntoView({behavior:"instant",block:"center"}));
   await expect.poll(()=>page.getByRole("link",{name:/01 KAIROS/}).getAttribute("aria-current"),{timeout:3000}).toBe("location");
 });
+
+
+test("Signal Form follows the 700px capability lifecycle",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","WebGL lifecycle probe runs once");
+  await page.setViewportSize({width:900,height:800});
+  await page.goto("/");
+  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.setViewportSize({width:440,height:800});
+  await expect(page.locator(".signal-layer")).toHaveAttribute("data-mode","poster");
+  await page.setViewportSize({width:900,height:800});
+  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+});

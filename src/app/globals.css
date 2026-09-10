@@ -50,7 +50,7 @@ html[data-theme="dark"] .hero::before,html[data-theme="dark"] .hero::after,html[
 .signal-poster .aperture-nodes{fill:var(--blue);stroke:none}
 .signal-poster .aperture-core{fill:var(--bg);stroke:var(--blue-soft);stroke-width:7}
 
-.project-media{--media-rotate-x:0deg;--media-rotate-y:0deg;--media-shift-x:0px;--media-shift-y:0px;--media-light-x:0px;--media-light-y:0px;perspective:1180px}
+.project-media{--media-rotate-x:0deg;--media-rotate-y:0deg;--media-shift-x:0px;--media-shift-y:0px;--media-light-x:0px;--media-light-y:0px;--media-primary-shift-x:0px;--media-primary-shift-y:0px;--media-halo-x:0px;--media-halo-y:0px;perspective:1180px}
 .media-primary{height:auto;box-shadow:0 28px 58px -32px color-mix(in srgb,var(--text) 46%,transparent)}
 .media-primary::after{content:"";position:absolute;z-index:2;inset:-16%;pointer-events:none;background:radial-gradient(circle at center,color-mix(in srgb,var(--blue-soft) 54%,transparent) 0,transparent 42%);opacity:0;transform:translate3d(var(--media-light-x),var(--media-light-y),0);transition:transform .25s cubic-bezier(.2,.72,.2,1),opacity .2s ease}
 .media-secondary{height:auto;box-shadow:0 30px 52px -22px color-mix(in srgb,var(--text) 50%,transparent)}
@@ -65,7 +65,7 @@ html[data-theme="dark"] .hero::before,html[data-theme="dark"] .hero::after,html[
 .media-colors .media-primary img{object-fit:cover;object-position:center}
 
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
-  .project-media .media-primary{transform:rotateX(var(--media-rotate-x)) rotateY(var(--media-rotate-y)) translate3d(calc(var(--media-shift-x)*.22),calc(var(--media-shift-y)*.22),0);transform-style:preserve-3d;transform-origin:center;transition:transform .21s cubic-bezier(.2,.72,.2,1);will-change:transform}
+  .project-media .media-primary{transform:rotateX(var(--media-rotate-x)) rotateY(var(--media-rotate-y)) translate3d(var(--media-primary-shift-x),var(--media-primary-shift-y),0);transform-style:preserve-3d;transform-origin:center;transition:transform .21s cubic-bezier(.2,.72,.2,1);will-change:transform}
   .project-media .media-secondary{transform:translate3d(var(--media-shift-x),var(--media-shift-y),30px);transition:transform .25s cubic-bezier(.2,.72,.2,1);will-change:transform}
   .project-media:hover .media-primary::after{opacity:.28}
 }
@@ -154,7 +154,7 @@ html[data-theme="dark"] .portrait::after{opacity:.16}
   pointer-events:none;
   background:radial-gradient(ellipse at 54% 52%,color-mix(in srgb,var(--blue-soft) 58%,transparent) 0,transparent 62%);
   opacity:.13;
-  transform:translate3d(calc(var(--media-light-x)*.55),calc(var(--media-light-y)*.55),0) scale(1.04);
+  transform:translate3d(var(--media-halo-x),var(--media-halo-y),0) scale(1.04);
   transition:transform .34s cubic-bezier(.2,.72,.2,1),opacity .24s ease;
 }
 .media-primary,.media-secondary,.project-media figcaption{z-index:1}
