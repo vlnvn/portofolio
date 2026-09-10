@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StaticSignalPoster } from "./StaticSignalPoster";
 import type SignalSceneType from "./SignalScene";
 
@@ -13,6 +13,7 @@ export function SignalCanvas(){
   const [failed,setFailed]=useState(false);
   const [dark,setDark]=useState(false);
   const [tilt,setTilt]=useState<Tilt>({x:0,y:0});
+  const lastHero=useRef({x:Number.NaN,y:Number.NaN});
 
   useEffect(()=>{
     queueMicrotask(()=>setDark(document.documentElement.dataset.theme==="dark"));
@@ -70,6 +71,7 @@ export function SignalCanvas(){
 
       sections.forEach(section=>{
         const rect=section.getBoundingClientRect();
+        if(rect.bottom < -120 || rect.top > innerHeight + 120)return;
         const scrollProgress=motionAllowed?Math.max(-1,Math.min(1,(innerHeight*.5-(rect.top+rect.height*.5))/Math.max(rect.height,1))):0;
         let ax=0,ay=0,bx=0,by=0,scale=1,opacity=1;
         switch(section.id){
