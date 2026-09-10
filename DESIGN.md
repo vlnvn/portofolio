@@ -1,155 +1,126 @@
-﻿# Production design contract — V2.3.1
+# Production design contract — Kinetic Blueprint + Kinetic Lightfield
 
-Status: locked 7 September 2026. This document describes the current implemented design only. Do not use it as a redesign brief.
+Status: current production authority. This file describes the implemented portfolio after human browser review. Where it differs from older Figma/static-freeze documents, this runtime contract reflects the later approved user decisions.
 
-## Design name
+## Identity and composition
 
-Kinetic Blueprint
+- Display type: Sora Light/Regular.
+- Body, evidence, navigation, captions and actions: Manrope Regular/SemiBold.
+- Desktop: asymmetric identity on the left, real portrait on the right, six full-width project chapters with different compositions.
+- Mobile: calm semantic single-column layout with the same project order and evidence.
+- Real project media remains more important than decorative interaction.
+- No skills wall, testimonials, fake metrics, generic bento grid, glassmorphism, tech-logo strip, fake terminal or stock/AI-generated portrait.
 
-## Typography
+## Color and atmosphere
 
-- Display: Sora Light / Regular (Google Fonts, preloaded)
-- Body, evidence, navigation, captions, actions: Manrope Regular / SemiBold (Google Fonts, preloaded)
-- Project titles remain in Sora; not ExtraBold
+### Light
+- Background: `#E9EFF6`
+- Surface: `#DCE5F0`
+- Text: `#131B2A`
+- Muted: `#5C6678`
+- Slate accent: `#283F62`
+- Energy: `#2F74E8`
+- Ice: `#DCEAFF`
+- Focus: `#0B57D0`
 
-## Color system
+### Dark
+- Background: `#070C16`
+- Surface: `#0E1522`
+- Text: `#E8EDF5`
+- Muted: `#9EABC0`
+- Accent: `#94ADD1`
+- Energy: `#70A4FF`
+- Ice: `#243A5A`
+- Focus: `#A8C7FF`
 
-### Light mode — cold slate / dusty-blue
+Kinetic Lightfield uses low-opacity palette-derived illumination. Sections share one continuous page base; transparent oversized light layers provide chapter rhythm without hard color bands. Dark mode may be more cinematic; light mode uses cool shadows and a dimmer off-white base rather than pure white.
 
-| Token | Value |
-|---|---|
-| Background | `#F3F6FB` |
-| Surface | `#E6ECF6` |
-| Text | `#131B2A` |
-| Muted | `#5C6678` |
-| Rule | `#C5CFDF` |
-| Slate accent | `#283F62` |
-| Interactive | `#1757AF` |
-| Energy | `#2F74E8` |
-| Ice | `#DCEAFF` |
-| Focus | `#0B57D0` |
+## Hero
 
-Contrast (text against background/surface): 15.92:1 / 14.53:1. Muted: 5.35:1 / 4.88:1. All links and focus meet WCAG 2.2 AA.
+The production hero combines factual identity, the approved real 6397 environmental portrait, and one procedural 3D Aperture Rig.
 
-### Dark mode — midnight / navy
+The portrait remains unaltered. On fine-pointer desktop it behaves as a restrained foreground plane with small translation/rotation and pointer-responsive light. It becomes static for coarse pointers and reduced motion.
 
-| Token | Value |
-|---|---|
-| Background | `#070C16` |
-| Surface | `#0E1522` |
-| Text | `#E8EDF5` |
-| Muted | `#9EABC0` |
-| Rule | `#333F54` |
-| Accent | `#94ADD1` |
-| Interactive | `#8CB6FF` |
-| Energy | `#70A4FF` |
-| Ice | `#243A5A` |
-| Focus | `#A8C7FF` |
+The Aperture Rig is the spatial expression of the eclipse/aperture theme-control language:
+- three ring structures;
+- three aperture/blade elements;
+- five nodes;
+- central negative space;
+- restrained physically shaded blue/ice materials.
 
-Project screenshots keep their source colors.
+It sits at the lower-right foreground edge of the portrait on desktop, with controlled overlap that never obscures the face or identity text.
 
-## Portrait
+The rig performs one short assembly on initial normal-motion desktop render, responds to pointer depth and moving key/fill light, then stops rendering after motion settles. It is not a persistent 00–06 chapter morph.
 
-Source: `IMG_6397.JPG.jpeg`. Final treatment: `design-review/v2-3/portrait/6397-waist-up-environmental-v231.jpg` — a truthful waist-up environmental crop. No background removal, no generative alteration, no identity/clothing/skin manipulation. No public filename or internal portrait label is exposed. Face remains clear at 1440, 1024, 768, 430, 375, and 320px.
+## Kinetic Lightfield chapter behavior
 
-Production file: `public/media/portrait/valensius-alven.jpg`
+The same palette is used throughout; chapters differ by light placement and motion grammar rather than independent brand colors:
+- Hero: portrait/rig-centered layered illumination.
+- KAIROS: directional light.
+- Ayam Kalintang: two localized workflow/station pools.
+- SAMBUT: opposing reciprocal lights.
+- The Colors of MIPA: broad diffuse field.
+- Aether3D: strongest spatial field.
+- N.A.R.A.: calmer layered closing field.
+- Contact: converging/settled light.
 
-## Page composition
+Pointer and scroll updates are requestAnimationFrame-throttled and rely primarily on transform/opacity. There is no autonomous endless background animation.
 
-### Desktop (≥1024px)
+## Project media
 
-Asymmetric hero: portrait occupies right column; name, discipline, scope and actions on the left. Six project chapters follow as full-width sections in alternating layout (text-left, media-left, split, community). Persistent Signal Form layer is positioned behind/around content.
+UI screenshots preserve their intrinsic aspect ratios rather than being forced into a universal frame. Complete interface evidence is preferred over cropping. The Colors of MIPA Reel remains an intentional 9:16 crop.
 
-### Mobile (<768px)
+Fine-pointer desktop media uses restrained perspective, translation and local light response. Secondary media receives stronger perceived Z separation. Reduced-motion and coarse-pointer experiences remain complete without these effects.
 
-Calmer semantic single-column composition. Name, portrait, scope, actions, navigation. No decorative project index beneath the hero. Contact email uses a responsive display size that keeps the full address intact at 430, 375, 360, and 320px.
+## Navigation and theme
 
-## Theme control
+The persistent adaptive navigation tracks the visible chapter and exposes Home/VA, project chapters, Contact and the theme control.
 
-44px control. Glyph: centered eclipse/aperture — an outer material disc with a concentric opening. Not a sun/moon pair. Implemented as a semantic `button` with `role="switch"`, `aria-checked`, accessible label, system-preference support, visible focus ring, and `localStorage` persistence.
-
-## Navigation
-
-Adaptive navigation bar. Persistent across scroll. Tracks the visible project chapter via IntersectionObserver. Shows `00 / 06 INTRO` through `06 / 06 N.A.R.A.`. Chapter links and Contact are reachable from the nav. Mobile shows a compact current-chapter indicator.
-
-## Six project chapters — equal dignity
-
-| # | Project | Layout |
-|---|---|---|
-| 01 | KAIROS | text-left |
-| 02 | Ayam Kalintang | media-left |
-| 03 | SAMBUT | split |
-| 04 | The Colors of MIPA | community |
-| 05 | Aether3D | media-left |
-| 06 | N.A.R.A. | text-left |
-
-All six chapters use real project media as primary visual evidence. No placeholder images.
-
-### Media captions (exact)
-
-- KAIROS: `Local replay · public LaDe pickup data`
-- Ayam Kalintang: `Kiosk interface · July 2026`
-- SAMBUT: `Patient terminal`; `Staff terminal`
-- The Colors of MIPA: `Instagram Reel`
-- Aether3D: `Simplified browser preview / proxy`
-- N.A.R.A.: `Dashboard`; `Onboarding flow`
-
-## Signal Form
-
-One persistent actor. Seven states (00-06) driven by scroll position. One mutable ribbon BufferGeometry, three planes, five nodes. Lazy-loaded only on capable viewports at >=700px initial mount. `frameloop="demand"`. Stops invalidating after interpolation settles. No textures, no post-processing.
-
-Mobile, reduced-motion, failed import, WebGL unavailability, and context loss all select the deterministic SVG poster.
-
-## Reduced-motion fallback
-
-`prefers-reduced-motion: reduce` -> deterministic SVG poster at all viewport sizes. No WebGL load attempted.
+Theme control is a 44px semantic switch using the custom eclipse/aperture glyph. It respects system preference on first visit and persists explicit user choice in localStorage.
 
 ## WebGL progressive enhancement
 
-Capability check at mount: `canvas.getContext("webgl2") || canvas.getContext("webgl")`. If null, poster is shown. Resize events do not re-evaluate eligibility after mount (intentional: initial-capability-based, safe, prevents mid-session context churn).
+WebGL is decorative, not semantic.
+- >=700px + WebGL + normal motion: lazy-load the hero scene.
+- <700px: deterministic static aperture poster.
+- reduced motion: deterministic static aperture poster.
+- WebGL unavailable/import failure/context loss: deterministic static aperture poster.
+- resizing across 700px re-evaluates eligibility and can tear down/recover WebGL.
+- one Canvas maximum.
+- `frameloop="demand"`, DPR <=1.5, no post-processing, texture dependency, particles or permanent idle loop.
 
-## Accessibility requirements
+All identity, project evidence, links and contact information remain HTML outside Canvas.
 
-- One `<h1>` per page
-- Ordered heading hierarchy
-- Keyboard-visible skip link
-- All nav links and controls reachable and focusable by keyboard
-- Visible 2px focus outline on all interactive elements
-- 44px minimum touch/click target for controls
-- Axe zero violations (Chromium, light and dark)
-- 200% CSS zoom + WCAG text spacing: no horizontal overflow
-- 320px minimum viewport: no horizontal overflow
-- `prefers-color-scheme` respected on first visit
+## Accessibility and reliability
 
-## Anti-AI-slop constraints
+- One H1 per public route.
+- Logical headings and semantic landmarks.
+- Keyboard-visible skip link and focus-visible states.
+- 44px theme-control target.
+- No essential hover-only or WebGL-only information.
+- `prefers-reduced-motion` removes nonessential spatial motion.
+- 320px minimum target without horizontal overflow.
+- 200% zoom/text-spacing reflow must remain usable.
+- Custom 404 and global runtime recovery UI exist.
+- Real project image alt text describes the evidence shown.
 
-The following are permanently banned from this design:
+## Public project captions
 
-- Purple/cyan decorative gradients
-- Glassmorphism or frosted-glass panels
-- Particle systems or canvas decorations
-- Generic floating orbs or cursor trails
-- Repeated fade-up entrance animations
-- Skill pills, technology walls, or badge grids
-- Bento card layouts
-- Glowing or animated borders
-- Decorative code blocks
-- Fake metrics or unverified engagement figures
-- Generic marketing copy
+- KAIROS: `Local replay · public LaDe pickup data`
+- Ayam Kalintang: `Kiosk interface · July 2026`
+- SAMBUT: `Patient terminal`
+- The Colors of MIPA: `Instagram Reel`
+- Aether3D: `Simplified browser preview / proxy`
+- N.A.R.A.: `Dashboard`
 
-## SEO and meta
+## SEO / share / security
 
-- Unique title and description per route
-- Open Graph / Twitter card metadata
-- Generated OG image
-- `sitemap.xml` and `robots.txt` cover all public routes
-- `NEXT_PUBLIC_SITE_URL` must be set to the final HTTPS origin before production deployment
+Production provides per-route titles/descriptions/canonicals, a branded aperture favicon, branded Open Graph image, sitemap, robots, ProfilePage/Person structured data, and crawlable internal/source links. `NEXT_PUBLIC_SITE_URL` must be the real final HTTPS origin before production deployment.
 
-## Security headers (production)
+Production headers include CSP, referrer policy, MIME sniffing protection, framing protection and a restrictive permissions policy. Preview deployments send `X-Robots-Tag: noindex, nofollow`.
 
-`Content-Security-Policy`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Permissions-Policy`. Preview deployments additionally send `X-Robots-Tag: noindex, nofollow`.
+## Permanent anti-slop constraints
 
-## Final Figma reference
+Do not add generic purple/pink/cyan AI gradients, aurora blobs, particles, cursor trails, custom cursors, floating tech logos, glowing text/borders, glass panels, decorative dashboards, fake source code, repeated fade-up choreography, fabricated metrics or unverified project claims.
 
-Page: `190:281` -- `V2.3.1 / FINAL FREEZE`
-Desktop light: `190:282` / Desktop dark: `190:477` / 1024: `190:673` / 768: `190:825` / 430: `190:977` / 375: `190:1130` / 320: `190:1283`
+Creative intensity comes from the Aperture identity, responsive light/depth, asymmetric composition and real evidence rather than effect quantity.
