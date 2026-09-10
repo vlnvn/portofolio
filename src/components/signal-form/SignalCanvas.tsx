@@ -92,15 +92,19 @@ export function SignalCanvas(){
         const inside=pointerAllowed&&pointer.clientX>=bounds.left&&pointer.clientX<=bounds.right&&pointer.clientY>=bounds.top&&pointer.clientY<=bounds.bottom;
         const hx=inside?Math.max(-1,Math.min(1,(pointer.clientX-bounds.left)/bounds.width*2-1)):0;
         const hy=inside?Math.max(-1,Math.min(1,(pointer.clientY-bounds.top)/bounds.height*2-1)):0;
-        setTilt({x:hx,y:hy});
-        const portrait=hero.querySelector<HTMLElement>(".portrait");
-        if(portrait){
-          setValue(portrait,"--portrait-x",hx*11);
-          setValue(portrait,"--portrait-y",hy*8);
-          setValue(portrait,"--portrait-rx",-hy*1,"deg");
-          setValue(portrait,"--portrait-ry",hx*1.15,"deg");
-          setValue(portrait,"--portrait-light-x",hx*24);
-          setValue(portrait,"--portrait-light-y",hy*18);
+        const heroChanged=Math.abs(lastHero.current.x-hx)>.001||Math.abs(lastHero.current.y-hy)>.001;
+        if(heroChanged){
+          lastHero.current={x:hx,y:hy};
+          setTilt(current=>Math.abs(current.x-hx)<.001&&Math.abs(current.y-hy)<.001?current:{x:hx,y:hy});
+          const portrait=hero.querySelector<HTMLElement>(".portrait");
+          if(portrait){
+            setValue(portrait,"--portrait-x",hx*11);
+            setValue(portrait,"--portrait-y",hy*8);
+            setValue(portrait,"--portrait-rx",-hy*1,"deg");
+            setValue(portrait,"--portrait-ry",hx*1.15,"deg");
+            setValue(portrait,"--portrait-light-x",hx*24);
+            setValue(portrait,"--portrait-light-y",hy*18);
+          }
         }
       }
     };
