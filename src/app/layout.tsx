@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description,
   applicationName: "Valensius Alven Portfolio",
   authors: [{ name: "Valensius Alven" }], creator: "Valensius Alven",
-  openGraph: { title: "Valensius Alven", description, type: "website", locale: "en_US" },
+  openGraph: { title: "Valensius Alven", description, type: "website", locale: "en_US", siteName: "Valensius Alven", url: "/" },
   twitter: { card: "summary_large_image", title: "Valensius Alven", description },
 };
 export const viewport: Viewport = { colorScheme: "light dark", themeColor: [{ media: "(prefers-color-scheme: light)", color: "#E9EFF6" }, { media: "(prefers-color-scheme: dark)", color: "#070C16" }] };

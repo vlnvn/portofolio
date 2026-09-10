@@ -9,15 +9,20 @@ export default function Home() {
   const url=siteUrl("/").href;
   const profile={
     "@context":"https://schema.org",
-    "@type":"ProfilePage",
-    url,
-    mainEntity:{
-      "@type":"Person",
-      name:"Valensius Alven",
-      url,
-      sameAs:[siteLinks.github,siteLinks.linkedin],
-      affiliation:{"@type":"CollegeOrUniversity",name:"Universitas Padjadjaran"},
-    },
+    "@graph":[
+      {"@type":"WebSite",name:"Valensius Alven",url},
+      {
+        "@type":"ProfilePage",
+        url,
+        mainEntity:{
+          "@type":"Person",
+          name:"Valensius Alven",
+          url,
+          sameAs:[siteLinks.github,siteLinks.linkedin],
+          affiliation:{"@type":"CollegeOrUniversity",name:"Universitas Padjadjaran"},
+        },
+      },
+    ],
   };
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(profile).replace(/</g,"\\u003c")}}/>
