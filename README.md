@@ -1,6 +1,6 @@
 # Valensius Alven portfolio
 
-Production candidate for Valensius Alven, an Informatics Engineering student at Universitas Padjadjaran. The site presents six projects through verified roles, ownership boundaries, real artifacts and recorded outcomes.
+Production candidate for Valensius Alven, an Informatics Engineering student at Universitas Padjadjaran. The site presents six projects through verified roles, ownership boundaries, real artifacts and recorded outcomes. The Kinetic Lightfield layer progressively enhances the static HTML with a demand-rendered Three.js hero aperture, responsive lighting and restrained media depth.
 
 ## Run locally
 
