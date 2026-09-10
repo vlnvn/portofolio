@@ -197,3 +197,10 @@ html[data-theme="dark"] .project-media::before{opacity:.18}
 @media (hover:hover) and (pointer:fine){
   .theme-toggle:hover .eclipse-orbit{border-color:var(--interactive)}
 }
+
+
+/* Case-study navigation polish */
+.case-toolbar{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-bottom:80px}
+.case-toolbar .case-back{margin-bottom:0}
+.case-return{margin-top:44px;padding-top:28px;border-top:1px solid var(--rule)}
+@media(max-width:699px){.case-toolbar{margin-bottom:60px}}

@@ -48,3 +48,29 @@ test("Signal Form follows the 700px capability lifecycle",async({page},testInfo)
   await page.setViewportSize({width:900,height:800});
   await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
 });
+
+
+test("case studies preserve theme control and return path",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","case-study interaction probe runs once");
+  await page.goto("/work/kairos");
+  const toggle=page.getByRole("switch",{name:"Dark theme"});
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme","dark");
+  await expect(page.getByRole("link",{name:"Return to selected work"}).last()).toHaveAttribute("href","/#kairos");
+});
+
+test("hero aperture is foreground and portrait responds spatially",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","desktop spatial-layer probe runs once");
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto("/");
+  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  const order=await page.evaluate(()=>{
+    const signal=document.querySelector<HTMLElement>(".signal-layer");
+    const portrait=document.querySelector<HTMLElement>(".portrait");
+    return {signal:Number(getComputedStyle(signal!).zIndex),portrait:Number(getComputedStyle(portrait!).zIndex)};
+  });
+  expect(order.signal).toBeGreaterThan(order.portrait);
+  await page.mouse.move(1200,420);
+  await expect.poll(()=>page.locator(".portrait").evaluate(el=>(el as HTMLElement).style.getPropertyValue("--portrait-x")),{timeout:2000}).not.toBe("0.00px");
+});
