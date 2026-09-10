@@ -19,6 +19,7 @@ Status: current production authority. This file describes the implemented portfo
 - Text: `#131B2A`
 - Muted: `#5C6678`
 - Slate accent: `#283F62`
+- Interactive: `#1757AF`
 - Energy: `#2F74E8`
 - Ice: `#DCEAFF`
 - Focus: `#0B57D0`
@@ -29,6 +30,7 @@ Status: current production authority. This file describes the implemented portfo
 - Text: `#E8EDF5`
 - Muted: `#9EABC0`
 - Accent: `#94ADD1`
+- Interactive: `#8CB6FF`
 - Energy: `#70A4FF`
 - Ice: `#243A5A`
 - Focus: `#A8C7FF`
