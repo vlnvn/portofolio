@@ -93,7 +93,15 @@ export function SignalCanvas(){
         const hx=inside?Math.max(-1,Math.min(1,(pointer.clientX-bounds.left)/bounds.width*2-1)):0;
         const hy=inside?Math.max(-1,Math.min(1,(pointer.clientY-bounds.top)/bounds.height*2-1)):0;
         setTilt({x:hx,y:hy});
-        setValue(hero,"--portrait-x",hx*11);setValue(hero,"--portrait-y",hy*8);setValue(hero,"--portrait-rx",-hy*1,"deg");setValue(hero,"--portrait-ry",hx*1.15,"deg");
+        const portrait=hero.querySelector<HTMLElement>(".portrait");
+        if(portrait){
+          setValue(portrait,"--portrait-x",hx*11);
+          setValue(portrait,"--portrait-y",hy*8);
+          setValue(portrait,"--portrait-rx",-hy*1,"deg");
+          setValue(portrait,"--portrait-ry",hx*1.15,"deg");
+          setValue(portrait,"--portrait-light-x",hx*24);
+          setValue(portrait,"--portrait-light-y",hy*18);
+        }
       }
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};

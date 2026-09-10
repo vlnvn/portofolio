@@ -25,3 +25,11 @@ test-results/
 # Generated browser-review captures
 /design-review/v3-production/
 .tmp-tools/
+
+/IMG_*.JPG.jpeg
+/AGENTS.md
+/CLAUDE.md
+/experiments/
+/design-review/v2-1-system-proof/
+/design-review/v2-2/
+/design-review/v2-3/

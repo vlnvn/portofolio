@@ -1,6 +1,6 @@
 # Production asset manifest
 
-All files below are committed local assets and are served through `next/image`. Full originals and capture provenance remain under `design-review/v2-3/project-evidence/` where available.
+All files below are committed production assets and are served through `next/image`. The production branch intentionally keeps runtime media compact; evidence and claim boundaries remain documented here and in `EVIDENCE.md`.
 
 | Project | Production file | Dimensions | Bytes | What it proves | Boundary / crop |
 |---|---|---:|---:|---|---|
