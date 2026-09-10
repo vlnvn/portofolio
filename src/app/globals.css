@@ -186,3 +186,10 @@ html[data-theme="dark"] .project-media::before{opacity:.18}
 @media(prefers-reduced-motion:reduce){
   .portrait::after,.project-media::before{display:none}
 }
+
+/* Preserve complete case-study evidence without synthetic letterboxing. */
+.case-hero-media.case-hero-kairos{height:auto;aspect-ratio:1344/792}
+.case-hero-media.case-hero-kalintang{height:auto;aspect-ratio:4/3}
+@media(max-width:699px){
+  .case-hero-media.case-hero-kairos,.case-hero-media.case-hero-kalintang{height:auto}
+}
