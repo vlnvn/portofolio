@@ -14,10 +14,11 @@ function ResponsiveLights({tilt,dark}:{tilt:Tilt;dark:boolean}){
   const current=useRef({x:0,y:0});
   const {invalidate}=useThree();
   useEffect(()=>{target.current=tilt;invalidate();},[tilt,invalidate]);
-  useFrame(()=>{
+  useFrame((_,delta)=>{
     const dx=target.current.x-current.current.x;
     const dy=target.current.y-current.current.y;
-    current.current.x+=dx*.16;current.current.y+=dy*.16;
+    const alpha=1-Math.exp(-12*delta);
+    current.current.x+=dx*alpha;current.current.y+=dy*alpha;
     if(key.current)key.current.position.set(-2.6+current.current.x*1.15,3.4-current.current.y*.8,4.6+current.current.x*.32);
     if(fill.current)fill.current.position.set(3.2-current.current.x*.75,-1.4+current.current.y*.55,2.4-current.current.y*.28);
     if(Math.abs(dx)>.001||Math.abs(dy)>.001)invalidate();
@@ -39,7 +40,7 @@ function ApertureRig({tilt,dark}:{tilt:Tilt;dark:boolean}){
 
   useEffect(()=>{targetTilt.current=tilt;invalidate();},[tilt,invalidate]);
 
-  useFrame(({clock})=>{
+  useFrame(({clock},delta)=>{
     if(introStart.current===null)introStart.current=clock.elapsedTime;
     const raw=Math.min(1,(clock.elapsedTime-introStart.current)/.88);
     const settle=1-Math.pow(1-raw,3);
@@ -47,7 +48,8 @@ function ApertureRig({tilt,dark}:{tilt:Tilt;dark:boolean}){
     const targetY=targetTilt.current.x*.15;
     const dx=targetX-currentTilt.current.x;
     const dy=targetY-currentTilt.current.y;
-    currentTilt.current.x+=dx*.14;currentTilt.current.y+=dy*.14;
+    const tiltAlpha=1-Math.exp(-10*delta);
+    currentTilt.current.x+=dx*tiltAlpha;currentTilt.current.y+=dy*tiltAlpha;
 
     ringRefs.current.forEach((mesh,index)=>{
       if(!mesh)return;
