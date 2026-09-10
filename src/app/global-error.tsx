@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 export default function GlobalError({reset}:{error:Error&{digest?:string};reset:()=>void}){
   return <html lang="en">
     <body style={{margin:0,minHeight:"100vh",display:"grid",placeItems:"center",background:"#070C16",color:"#E8EDF5",fontFamily:"system-ui,sans-serif"}}>
@@ -9,7 +11,7 @@ export default function GlobalError({reset}:{error:Error&{digest?:string};reset:
         <p style={{maxWidth:520,lineHeight:1.6,color:"#9EABC0"}}>The page could not finish rendering. You can retry without losing the public project index.</p>
         <div style={{display:"flex",gap:18,marginTop:32,flexWrap:"wrap"}}>
           <button onClick={reset} style={{font:"inherit",padding:"10px 14px",border:"1px solid #333F54",borderRadius:10,background:"#0E1522",color:"#E8EDF5",cursor:"pointer"}}>Try again</button>
-          <a href="/" style={{padding:"10px 0",color:"#8CB6FF"}}>Return home</a>
+          <Link href="/" style={{padding:"10px 0",color:"#8CB6FF"}}>Return home</Link>
         </div>
       </main>
     </body>
