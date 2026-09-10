@@ -15,3 +15,36 @@ html[data-theme="dark"] .discipline,html[data-theme="dark"] .nav-mark,html[data-
 
 
 html[data-theme="dark"] .project-actions{color:#94add1}
+
+/* Hero-only spatial sculpture and evidence-led media interaction. */
+.hero .signal-layer{position:absolute;z-index:2;right:clamp(22px,12vw,176px);top:232px;width:min(560px,43vw);height:330px;pointer-events:none;opacity:.9;transition:opacity .2s ease}
+.hero .signal-layer[data-mode="poster"]{opacity:.7}
+.hero .signal-layer canvas{width:100%!important;height:100%!important}
+
+.project-media{--media-rotate-x:0deg;--media-rotate-y:0deg;--media-shift-x:0px;--media-shift-y:0px;perspective:1200px}
+.layout-community{background:transparent;grid-template-columns:minmax(430px,660px) minmax(300px,380px)}
+.layout-community .project-media{width:clamp(300px,26vw,360px);max-width:100%;justify-self:center;margin-left:auto;margin-right:auto}
+.layout-community .media-primary{width:100%;height:auto;aspect-ratio:9/16;border-radius:20px}
+.media-colors .media-primary img{object-fit:cover;object-position:center}
+
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .project-media .media-primary{transform:rotateX(var(--media-rotate-x)) rotateY(var(--media-rotate-y));transform-style:preserve-3d;transform-origin:center;transition:transform .2s cubic-bezier(.2,.7,.2,1);will-change:transform}
+  .project-media .media-secondary{transform:translate3d(var(--media-shift-x),var(--media-shift-y),18px);transition:transform .24s cubic-bezier(.2,.7,.2,1);will-change:transform}
+}
+
+@media(max-width:699px){
+  .hero .signal-layer{display:block;left:12px;right:auto;top:344px;width:54vw;height:120px;opacity:.82}
+  .hero-signal{display:none}
+  .layout-community .project-media{width:min(88vw,340px);align-self:center}
+  .layout-community .media-primary{height:auto;aspect-ratio:9/16}
+}
+
+@media(max-width:359px){
+  .hero .signal-layer{left:8px;width:55vw}
+  .layout-community .project-media{width:min(90vw,300px)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hero .signal-layer{display:block}
+  .project-media .media-primary,.project-media .media-secondary{transform:none!important;will-change:auto}
+}

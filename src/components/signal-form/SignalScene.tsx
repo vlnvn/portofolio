@@ -1,32 +1,77 @@
 "use client";
-/* eslint-disable react-hooks/immutability -- Three.js BufferGeometry is intentionally mutated inside the render loop. */
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { signalStates } from "./states";
+import { heroSignalState } from "./states";
 
-function Actor({ progress, dark }: { progress: number; dark: boolean }) {
-  const group = useRef<THREE.Group>(null); const ribbon = useRef<THREE.Mesh>(null);
-  const planeRefs = useRef<(THREE.Mesh|null)[]>([]); const nodeRefs = useRef<(THREE.Mesh|null)[]>([]);
-  const current = useRef(progress); const { invalidate, gl } = useThree();
-  const geometry = useMemo(() => { const g=new THREE.BufferGeometry(); const positions=new Float32Array(66*2*3); const indices:number[]=[]; for(let i=0;i<65;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);} g.setAttribute("position",new THREE.BufferAttribute(positions,3));g.setIndex(indices);return g; },[]);
-  const planeGeometry=useMemo(()=>new THREE.PlaneGeometry(1.05,.38),[]); const nodeGeometry=useMemo(()=>new THREE.SphereGeometry(.075,12,8),[]);
-  useFrame(() => {
-    const delta=progress-current.current; if(Math.abs(delta)>.001){current.current+=delta*.13;invalidate();}else current.current=progress;
-    const p=Math.max(0,Math.min(6,current.current)); const a=Math.floor(p),b=Math.min(6,a+1),t=p-a,s0=signalStates[a],s1=signalStates[b];
-    const curvePoints=s0.ribbon.map((point,i)=>new THREE.Vector3().fromArray(point).lerp(new THREE.Vector3().fromArray(s1.ribbon[i]),t)); const curve=new THREE.CatmullRomCurve3(curvePoints);
-    const pos=geometry.attributes.position as THREE.BufferAttribute;
-    for(let i=0;i<66;i++){const u=i/65,center=curve.getPoint(u),tan=curve.getTangent(u).normalize(),normal=new THREE.Vector3(-tan.y,tan.x,0).normalize(),width=.07+Math.sin(Math.PI*u)*.11; for(let side=0;side<2;side++){const v=center.clone().addScaledVector(normal,side?width:-width);pos.setXYZ(i*2+side,v.x,v.y,v.z);}}
-    pos.needsUpdate=true; geometry.computeVertexNormals();
-    planeRefs.current.forEach((mesh,i)=>{if(!mesh)return; const p0=s0.planes[i],p1=s1.planes[i];mesh.position.set(THREE.MathUtils.lerp(p0[0],p1[0],t),THREE.MathUtils.lerp(p0[1],p1[1],t),THREE.MathUtils.lerp(p0[2],p1[2],t));mesh.rotation.z=THREE.MathUtils.lerp(p0[3],p1[3],t);});
-    nodeRefs.current.forEach((mesh,i)=>{if(!mesh)return; const n0=s0.nodes[i],n1=s1.nodes[i];mesh.position.set(THREE.MathUtils.lerp(n0[0],n1[0],t),THREE.MathUtils.lerp(n0[1],n1[1],t),THREE.MathUtils.lerp(n0[2],n1[2],t));});
+type Tilt = { x: number; y: number };
+
+function Sculpture({ tilt, dark }: { tilt:Tilt; dark:boolean }) {
+  const group=useRef<THREE.Group>(null);
+  const currentTilt=useRef({x:0,y:0});
+  const targetTilt=useRef(tilt);
+  const {invalidate,gl}=useThree();
+  const ribbonGeometry=useMemo(()=>{
+    const geometry=new THREE.BufferGeometry();
+    const positions=new Float32Array(66*2*3);
+    const indices:number[]=[];
+    const curve=new THREE.CatmullRomCurve3(heroSignalState.ribbon.map(point=>new THREE.Vector3().fromArray(point)));
+    for(let i=0;i<65;i++){const a=i*2;indices.push(a,a+1,a+2,a+1,a+3,a+2);}
+    const attribute=new THREE.BufferAttribute(positions,3);
+    for(let i=0;i<66;i++){
+      const u=i/65;
+      const center=curve.getPoint(u);
+      const tangent=curve.getTangent(u).normalize();
+      const side=new THREE.Vector3(-tangent.y,tangent.x,.16).normalize();
+      const width=.065+Math.sin(Math.PI*u)*.12;
+      for(let edge=0;edge<2;edge++){
+        const vertex=center.clone().addScaledVector(side,edge?width:-width);
+        attribute.setXYZ(i*2+edge,vertex.x,vertex.y,vertex.z);
+      }
+    }
+    geometry.setAttribute("position",attribute);
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  },[]);
+  const slabGeometry=useMemo(()=>new THREE.BoxGeometry(1,1,1),[]);
+  const nodeGeometry=useMemo(()=>new THREE.SphereGeometry(.085,18,12),[]);
+
+  useEffect(()=>{targetTilt.current=tilt;invalidate();},[tilt,invalidate]);
+
+  useFrame(()=>{
+    const object=group.current;
+    if(!object)return;
+    const targetX=-targetTilt.current.y*.055;
+    const targetY=targetTilt.current.x*.08;
+    const dx=targetX-currentTilt.current.x;
+    const dy=targetY-currentTilt.current.y;
+    if(Math.abs(dx)>.0004||Math.abs(dy)>.0004){
+      currentTilt.current.x+=dx*.16;
+      currentTilt.current.y+=dy*.16;
+      object.rotation.x=-.06+currentTilt.current.x;
+      object.rotation.y=.08+currentTilt.current.y;
+      invalidate();
+    }else{
+      currentTilt.current.x=targetX;
+      currentTilt.current.y=targetY;
+      object.rotation.x=-.06+targetX;
+      object.rotation.y=.08+targetY;
+    }
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
-    document.documentElement.dataset.signalCalls=String(gl.info.render.calls); document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
+    document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
+    document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
   });
-  const blue=dark?"#70A4FF":"#2F74E8",pale=dark?"#243A5A":"#DCEAFF";
-  return <group ref={group}><mesh ref={ribbon} geometry={geometry}><meshBasicMaterial color={blue} side={THREE.DoubleSide}/></mesh>{signalStates[0].planes.map((_,i)=><mesh key={`p${i}`} ref={(el)=>{planeRefs.current[i]=el}} geometry={planeGeometry}><meshBasicMaterial color={i===1?pale:blue} transparent opacity={i===1?.48:.78} side={THREE.DoubleSide}/></mesh>)}{signalStates[0].nodes.map((_,i)=><mesh key={`n${i}`} ref={(el)=>{nodeRefs.current[i]=el}} geometry={nodeGeometry}><meshBasicMaterial color={i===2?pale:blue}/></mesh>)}</group>;
+
+  const blue=dark?"#70A4FF":"#2F74E8";
+  const pale=dark?"#243A5A":"#DCEAFF";
+  return <group ref={group} rotation={[-.06,.08,0]}>
+    <mesh geometry={ribbonGeometry}><meshStandardMaterial color={blue} roughness={.38} metalness={.06} side={THREE.DoubleSide}/></mesh>
+    {heroSignalState.slabs.map((slab,index)=><mesh key={index} geometry={slabGeometry} position={slab.position} rotation={slab.rotation} scale={slab.scale}><meshStandardMaterial color={index===1?pale:blue} roughness={.42} metalness={.04} transparent opacity={index===1?.78:.92}/></mesh>)}
+    {heroSignalState.nodes.map((position,index)=><mesh key={index} geometry={nodeGeometry} position={position}><meshStandardMaterial color={index===2?pale:blue} roughness={.3} metalness={.08}/></mesh>)}
+  </group>;
 }
 
-export default function SignalScene({ progress, dark, onLost }: { progress:number; dark:boolean; onLost:()=>void }) {
-  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.4],fov:42}} gl={{antialias:true,alpha:true,powerPreference:"low-power"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event: Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><Actor progress={progress} dark={dark}/></Canvas>;
+export default function SignalScene({ tilt, dark, onLost }: { tilt:Tilt; dark:boolean; onLost:()=>void }) {
+  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.6],fov:40}} gl={{antialias:true,alpha:true,powerPreference:"low-power"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event:Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><ambientLight intensity={dark?.82:1.08}/><directionalLight position={[-2.4,3.2,4.8]} intensity={dark?2.2:2.7}/><directionalLight position={[3,-1.5,2]} intensity={dark?.65:.82}/><Sculpture tilt={tilt} dark={dark}/></Canvas>;
 }
