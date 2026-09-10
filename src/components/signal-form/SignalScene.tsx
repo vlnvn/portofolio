@@ -23,7 +23,7 @@ function Actor({ progress, dark }: { progress: number; dark: boolean }) {
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls); document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
   });
-  const blue=dark?"#79a8ff":"#2f74e8",pale=dark?"#33527f":"#a8c7ff";
+  const blue=dark?"#70A4FF":"#2F74E8",pale=dark?"#243A5A":"#DCEAFF";
   return <group ref={group}><mesh ref={ribbon} geometry={geometry}><meshBasicMaterial color={blue} side={THREE.DoubleSide}/></mesh>{signalStates[0].planes.map((_,i)=><mesh key={`p${i}`} ref={(el)=>{planeRefs.current[i]=el}} geometry={planeGeometry}><meshBasicMaterial color={i===1?pale:blue} transparent opacity={i===1?.48:.78} side={THREE.DoubleSide}/></mesh>)}{signalStates[0].nodes.map((_,i)=><mesh key={`n${i}`} ref={(el)=>{nodeRefs.current[i]=el}} geometry={nodeGeometry}><meshBasicMaterial color={i===2?pale:blue}/></mesh>)}</group>;
 }
 
