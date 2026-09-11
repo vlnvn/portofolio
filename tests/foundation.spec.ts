@@ -74,3 +74,57 @@ test("hero aperture is foreground and portrait responds spatially",async({page},
   await page.mouse.move(1200,420);
   await expect.poll(()=>page.locator(".portrait").evaluate(el=>(el as HTMLElement).style.getPropertyValue("--portrait-x")),{timeout:2000}).not.toBe("0.00px");
 });
+
+test("kinetic interaction visibly responds to pointer",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","spatial interaction probe runs once");
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto("/");
+  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.waitForTimeout(1000);
+  const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
+  await page.mouse.move(1220,430);
+  await expect.poll(()=>Number(page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0)),{timeout:2000}).toBeGreaterThan(5);
+  await expect.poll(()=>Number(page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
+  const ambient=await page.locator("html").evaluate(el=>({section:(el as HTMLElement).dataset.lightSection,x:getComputedStyle(el).getPropertyValue("--ambient-a-x")}));
+  expect(ambient.section).toBe("top");
+  expect(ambient.x.trim()).not.toBe("0px");
+});
+
+test("project media light and shadow follow the pointer",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","media depth probe runs once");
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto("/");
+  await page.locator("#kairos .project-media").scrollIntoViewIfNeeded();
+  const media=page.locator("#kairos .project-media");
+  const box=await media.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.move(box!.x+box!.width*.82,box!.y+box!.height*.28);
+  await expect.poll(()=>media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-light-x"))||0)).toBeGreaterThan(5);
+  await expect.poll(()=>Math.abs(Number(media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||0))),{timeout:2000}).toBeGreaterThan(2);
+});
+
+test("continuous ambient field removes per-section color seams",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","visual-structure probe runs once");
+  await page.goto("/");
+  const result=await page.evaluate(()=>{
+    const ids=["top","kairos","ayam-kalintang","sambut","colors","aether3d","nara"];
+    return ids.map(id=>{
+      const element=document.getElementById(id)!;
+      return {id,before:getComputedStyle(element,"::before").display,after:getComputedStyle(element,"::after").display,background:getComputedStyle(element).backgroundColor};
+    });
+  });
+  for(const item of result){expect(item.before).toBe("none");expect(item.after).toBe("none");expect(item.background).toBe("rgba(0, 0, 0, 0)");}
+});
+
+test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","404 WebGL probe runs once");
+  await page.setViewportSize({width:1440,height:900});
+  const response=await page.goto("/missing-interactive-page");
+  expect(response?.status()).toBe(404);
+  await expect.poll(()=>page.locator(".not-found .signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.waitForTimeout(900);
+  const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
+  await page.mouse.move(1120,420);
+  await expect.poll(()=>Number(page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+});
