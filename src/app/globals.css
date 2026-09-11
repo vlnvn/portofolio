@@ -320,3 +320,47 @@ html[data-theme="dark"] .media-secondary{box-shadow:var(--media-secondary-shadow
   html[data-theme="dark"] .project-media:hover::before{opacity:.34!important}
   .theme-toggle:hover .eclipse-orbit{border-color:var(--interactive)}
 }
+
+
+/* V3.5 interaction/visual repair */
+.contact{
+  border-top:1px solid var(--rule)!important;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb,var(--surface) 82%,transparent) 0,
+      color-mix(in srgb,var(--surface) 44%,transparent) 76px,
+      transparent 220px
+    )!important;
+}
+.media-primary::after{
+  inset:-24%!important;
+  background:
+    radial-gradient(
+      ellipse 72% 62% at calc(50% + var(--media-light-x)) calc(50% + var(--media-light-y)),
+      color-mix(in srgb,var(--blue) 16%,transparent) 0,
+      color-mix(in srgb,var(--blue) 6%,transparent) 36%,
+      transparent 74%
+    )!important;
+  mix-blend-mode:soft-light;
+  opacity:.12!important;
+}
+.project-media:hover .media-primary::after{opacity:.28!important}
+html[data-theme="dark"] .media-primary::after{
+  mix-blend-mode:screen;
+  opacity:.07!important;
+}
+html[data-theme="dark"] .project-media:hover .media-primary::after{opacity:.16!important}
+.project-media::before{
+  background:
+    radial-gradient(
+      ellipse 76% 70% at calc(54% + var(--media-halo-x)) calc(52% + var(--media-halo-y)),
+      color-mix(in srgb,var(--blue) 12%,transparent) 0,
+      color-mix(in srgb,var(--blue-soft) 12%,transparent) 42%,
+      transparent 78%
+    )!important;
+  opacity:.12!important;
+}
+.project-media:hover::before{opacity:.2!important}
+html[data-theme="dark"] .project-media::before{opacity:.14!important}
+html[data-theme="dark"] .project-media:hover::before{opacity:.22!important}

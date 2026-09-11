@@ -70,7 +70,6 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const desktopMotion=matchMedia("(min-width: 700px)");
     const sections=Array.from(document.querySelectorAll<HTMLElement>(".hero,.project-chapter,.contact,.not-found"));
-    const host=document.querySelector<HTMLElement>(hostSelector);
     const pointer={x:0,y:0,clientX:innerWidth/2,clientY:innerHeight/2,active:false};
     let frame=0;
 
@@ -124,6 +123,7 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
       }
       document.documentElement.dataset.lightfieldFrames=String((Number(document.documentElement.dataset.lightfieldFrames)||0)+1);
 
+      const host=document.querySelector<HTMLElement>(hostSelector);
       if(host){
         const bounds=host.getBoundingClientRect();
         const visible=bounds.bottom>0&&bounds.top<innerHeight;
