@@ -140,3 +140,16 @@ test("404 reduced-motion fallback preserves the 404 mark",async({page},testInfo)
   await expect(page.locator(".not-found .signal-layer")).toHaveAttribute("data-mode","poster");
   await expect(page.locator(".not-found .error-404-poster")).toHaveCount(1);
 });
+
+
+test("semantic artifacts keep moving while pointer is stationary",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","ambient artifact motion probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-state"),{timeout:3000}).toBe("nara");
+  await page.mouse.move(40,40);await page.waitForTimeout(300);
+  const before=await page.locator("html").getAttribute("data-signal-tilt");
+  await page.waitForTimeout(700);
+  const after=await page.locator("html").getAttribute("data-signal-tilt");
+  expect(before).not.toBe(after);
+});

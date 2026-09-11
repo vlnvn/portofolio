@@ -41,6 +41,38 @@ function drumstickMeatGeometry(){
   shape.bezierCurveTo(.08,-.64,-.08,-.67,-.2,-.62);
   return extrude(shape,.34,.06);
 }
+function digitFourShape(){
+  const shape=new THREE.Shape();
+  shape.moveTo(-.16,1.04);
+  shape.lineTo(.3,1.04);
+  shape.lineTo(.3,.08);
+  shape.lineTo(.64,.08);
+  shape.lineTo(.64,-.3);
+  shape.lineTo(.3,-.3);
+  shape.lineTo(.3,-1.04);
+  shape.lineTo(-.12,-1.04);
+  shape.lineTo(-.12,-.3);
+  shape.lineTo(-.82,-.3);
+  shape.lineTo(-.82,.1);
+  shape.lineTo(-.16,1.04);
+  const hole=new THREE.Path();
+  hole.moveTo(-.19,.58);
+  hole.lineTo(-.19,.08);
+  hole.lineTo(-.53,.08);
+  hole.lineTo(-.19,.58);
+  shape.holes.push(hole);
+  return shape;
+}
+
+const baseRotation:Record<ArtifactState,[number,number,number]>={
+  hero:[-.08,.12,0],
+  kairos:[-.28,.5,.04],
+  kalintang:[.04,-.2,-.56],
+  sambut:[-.06,.14,-.015],
+  colors:[-.05,.14,-.015],
+  aether:[-.22,.36,.06],
+  nara:[-.16,.12,-.035],
+};
 
 function KineticInput({target}:{target:MotionRef}){
   const {gl,invalidate}=useThree();
@@ -105,10 +137,11 @@ function useMaterials(dark:boolean){
     plate:new THREE.MeshStandardMaterial({color:"#F4F7FB",roughness:.34,metalness:.03}),
     green:new THREE.MeshStandardMaterial({color:"#55976E",roughness:.45,metalness:0}),
     food:new THREE.MeshStandardMaterial({color:"#D49A42",roughness:.48,metalness:0}),
-    xAxis:new THREE.MeshStandardMaterial({color:"#E36B68",roughness:.3,metalness:.16}),
-    yAxis:new THREE.MeshStandardMaterial({color:"#66A57A",roughness:.3,metalness:.16}),
-    zAxis:new THREE.MeshStandardMaterial({color:"#5792E2",roughness:.3,metalness:.16}),
-    edge:new THREE.LineBasicMaterial({color:dark?"#A9C9F5":"#173E6D",transparent:true,opacity:.78}),
+    xAxis:new THREE.MeshStandardMaterial({color:"#FF8F8A",roughness:.28,metalness:.12}),
+    yAxis:new THREE.MeshStandardMaterial({color:"#87E5AE",roughness:.28,metalness:.12}),
+    zAxis:new THREE.MeshStandardMaterial({color:"#83BAFF",roughness:.28,metalness:.12}),
+    aether:new THREE.MeshStandardMaterial({color:dark?"#A9CEFF":"#C9E0FF",roughness:.18,metalness:.08,transparent:true,opacity:.28,side:THREE.DoubleSide}),
+    edge:new THREE.LineBasicMaterial({color:dark?"#C5DEFF":"#6E9BCB",transparent:true,opacity:.92}),
   }),[dark]);
   useEffect(()=>{
     materials.energy.color.set(dark?"#74A9F5":"#3E82DC");
@@ -140,6 +173,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
   const rig=useRef<THREE.Group>(null),core=useRef<THREE.Group>(null);
   const heroRef=useRef<THREE.Group>(null),kairosRef=useRef<THREE.Group>(null),kalintangRef=useRef<THREE.Group>(null),sambutRef=useRef<THREE.Group>(null),colorsRef=useRef<THREE.Group>(null),aetherRef=useRef<THREE.Group>(null),naraRef=useRef<THREE.Group>(null);
   const heroRingA=useRef<THREE.Mesh>(null),heroRingB=useRef<THREE.Mesh>(null),heroRingC=useRef<THREE.Mesh>(null);
+  const heroBladeA=useRef<THREE.Mesh>(null),heroBladeB=useRef<THREE.Mesh>(null),heroBladeC=useRef<THREE.Mesh>(null);
   const current=useRef({x:0,y:0});
   const {invalidate,gl}=useThree();
   const m=useMaterials(dark);
@@ -150,14 +184,20 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     const sphere=new THREE.SphereGeometry(1,32,20);
     const torus=new THREE.TorusGeometry(1,.055,16,96);
     const thinTorus=new THREE.TorusGeometry(1,.035,14,96);
+    const heroRing0=new THREE.TorusGeometry(1.16,.03,14,88,Math.PI*2);
+    const heroRing1=new THREE.TorusGeometry(.82,.045,14,88,Math.PI*2);
+    const heroRing2=new THREE.TorusGeometry(1.48,.024,14,88,Math.PI*1.66);
+    const heroBlade=new THREE.CylinderGeometry(.16,.34,1.28,5,1,false);
+    const heroNode=new THREE.SphereGeometry(.085,18,12);
     const card=extrude(roundedRectShape(2.2,1.35,.18),.16,.045);
     const cameraBody=extrude(roundedRectShape(2.2,1.28,.16),.38,.055);
     const smallRounded=extrude(roundedRectShape(1,.55,.14),.18,.035);
     const drumstick=drumstickMeatGeometry();
+    const four=extrude(digitFourShape(),.24,.045);
     const edges=new THREE.EdgesGeometry(box,25);
     const plate=new THREE.CylinderGeometry(1,1,.12,64,1,false);
     const cone=new THREE.ConeGeometry(.11,.28,24);
-    return {box,cylinder,sphere,torus,thinTorus,card,cameraBody,smallRounded,drumstick,edges,plate,cone};
+    return {box,cylinder,sphere,torus,thinTorus,heroRing0,heroRing1,heroRing2,heroBlade,heroNode,card,cameraBody,smallRounded,drumstick,four,edges,plate,cone};
   },[]);
   useEffect(()=>()=>{Object.values(g).forEach(geometry=>geometry.dispose());},[g]);
 
@@ -172,9 +212,9 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     const applyState=(state:ArtifactState,group:THREE.Group|null)=>{
       if(!group)return;
       group.visible=settled?state===from:(state===from&&t<.52)||(state===to&&t>.48);
-      if(settled&&state===from){group.scale.setScalar(1);group.rotation.z=0;}
-      else if(state===from&&t<.52){const p=ease(t/.52);group.scale.setScalar(lerp(1,.035,p));group.rotation.z=p*.42;}
-      else if(state===to&&t>.48){const p=ease((t-.48)/.52);group.scale.setScalar(lerp(.035,1,p));group.rotation.z=(1-p)*-.42;}
+      if(settled&&state===from)group.scale.setScalar(1);
+      else if(state===from&&t<.52){const p=ease(t/.52);group.scale.setScalar(lerp(1,.035,p));}
+      else if(state===to&&t>.48){const p=ease((t-.48)/.52);group.scale.setScalar(lerp(.035,1,p));}
     };
     applyState("hero",heroRef.current);applyState("kairos",kairosRef.current);applyState("kalintang",kalintangRef.current);applyState("sambut",sambutRef.current);applyState("colors",colorsRef.current);applyState("aether",aetherRef.current);applyState("nara",naraRef.current);
 
@@ -187,11 +227,11 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       core.current.rotation.z=clock.elapsedTime*.22;
     }
 
-    const interaction:Record<ArtifactState,number>={hero:1,kairos:.76,kalintang:.82,sambut:.72,colors:.78,aether:.92,nara:.74};
+    const interaction:Record<ArtifactState,number>={hero:1,kairos:.8,kalintang:.84,sambut:.8,colors:.82,aether:.92,nara:.8};
     const strength=settled?interaction[from]:lerp(interaction[from],interaction[to],t);
-    const idle=settled?(from==="hero"?.85:.28):.18;
-    const desiredX=target.current.x*.24*strength+Math.sin(clock.elapsedTime*.55)*.022*idle;
-    const desiredY=-target.current.y*.2*strength+Math.cos(clock.elapsedTime*.48)*.018*idle;
+    const idle=settled?(from==="hero"?.95:.68):.28;
+    const desiredX=target.current.x*.25*strength+Math.sin(clock.elapsedTime*.47)*.028*idle;
+    const desiredY=-target.current.y*.21*strength+Math.cos(clock.elapsedTime*.41)*.024*idle;
     const dx=desiredX-current.current.x,dy=desiredY-current.current.y,alpha=1-Math.exp(-11.5*delta);
     current.current.x+=dx*alpha;current.current.y+=dy*alpha;
 
@@ -203,9 +243,23 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       rig.current.position.set(target.current.x*.1*strength,-target.current.y*.075*strength,Math.abs(target.current.x)*.05*strength);
     }
 
-    if(heroRingA.current)heroRingA.current.rotation.z=clock.elapsedTime*.31;
-    if(heroRingB.current)heroRingB.current.rotation.z=clock.elapsedTime*-.24;
-    if(heroRingC.current)heroRingC.current.rotation.z=clock.elapsedTime*.18;
+    const animateState=(state:ArtifactState,group:THREE.Group|null,phase:number)=>{
+      if(!group||!group.visible)return;
+      const base=baseRotation[state],active=settled&&state===from?1:.35;
+      group.position.x=Math.cos(clock.elapsedTime*.31+phase)*.025*active;
+      group.position.y=Math.sin(clock.elapsedTime*.37+phase)*.04*active;
+      group.rotation.x=base[0]+Math.sin(clock.elapsedTime*.29+phase)*.026*active;
+      group.rotation.y=base[1]+Math.cos(clock.elapsedTime*.27+phase)*.034*active;
+      group.rotation.z=base[2]+Math.sin(clock.elapsedTime*.23+phase)*.018*active;
+    };
+    animateState("hero",heroRef.current,0);animateState("kairos",kairosRef.current,.8);animateState("kalintang",kalintangRef.current,1.6);animateState("sambut",sambutRef.current,2.3);animateState("colors",colorsRef.current,3.1);animateState("aether",aetherRef.current,3.8);animateState("nara",naraRef.current,4.6);
+
+    if(heroRingA.current)heroRingA.current.rotation.z=.1+clock.elapsedTime*.30;
+    if(heroRingB.current)heroRingB.current.rotation.z=-.28-clock.elapsedTime*.23;
+    if(heroRingC.current)heroRingC.current.rotation.z=.72+clock.elapsedTime*.17;
+    if(heroBladeA.current)heroBladeA.current.rotation.z=.92+Math.sin(clock.elapsedTime*.36)*.045;
+    if(heroBladeB.current)heroBladeB.current.rotation.z=-.18+Math.sin(clock.elapsedTime*.33+1.4)*.04;
+    if(heroBladeC.current)heroBladeC.current.rotation.z=-.9+Math.sin(clock.elapsedTime*.31+2.2)*.045;
 
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
@@ -216,19 +270,21 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
   });
 
   return <group ref={rig}>
-    <group ref={heroRef} rotation={[-.08,.12,0]}>
-      <mesh ref={heroRingA} rotation={[1.08,.28,.1]} material={m.energy} geometry={g.torus}/>
-      <mesh ref={heroRingB} rotation={[.64,-.56,-.28]} scale={.73} material={m.ice} geometry={g.torus}/>
-      <mesh ref={heroRingC} rotation={[1.38,.58,.72]} scale={1.18} material={m.energy} geometry={g.thinTorus}/>
-      <mesh position={[-.78,.4,.2]} rotation={[-.18,.34,-.5]} scale={[.86,.26,.12]} material={m.energy} geometry={g.box}/>
-      <mesh position={[.04,-.78,.08]} rotation={[.42,-.2,.68]} scale={[.92,.28,.12]} material={m.deep} geometry={g.box}/>
-      <mesh position={[.84,.32,-.14]} rotation={[-.18,.54,.34]} scale={[.82,.25,.11]} material={m.ice} geometry={g.box}/>
-      <mesh position={[-1.28,-.38,.18]} scale={.09} material={m.ice} geometry={g.sphere}/>
-      <mesh position={[.08,.8,-.12]} scale={.11} material={m.energy} geometry={g.sphere}/>
-      <mesh position={[1.24,.34,.1]} scale={.085} material={m.ice} geometry={g.sphere}/>
+    <group ref={heroRef} rotation={baseRotation.hero}>
+      <mesh ref={heroRingA} position={[-.02,.02,.08]} rotation={[1.06,.28,.1]} material={m.energy} geometry={g.heroRing0}/>
+      <mesh ref={heroRingB} position={[.08,-.05,.36]} rotation={[.62,-.54,-.28]} material={m.ice} geometry={g.heroRing1}/>
+      <mesh ref={heroRingC} position={[-.08,.07,-.3]} rotation={[1.38,.58,.72]} material={m.energy} geometry={g.heroRing2}/>
+      <mesh ref={heroBladeA} position={[-.92,.46,.4]} rotation={[.7,.18,.92]} scale={[.52,.94,.42]} material={m.energy} geometry={g.heroBlade}/>
+      <mesh ref={heroBladeB} position={[.08,-.94,.08]} rotation={[.34,-.46,-.18]} scale={[.46,1.02,.38]} material={m.deep} geometry={g.heroBlade}/>
+      <mesh ref={heroBladeC} position={[.96,.34,-.2]} rotation={[-.58,.52,-.9]} scale={[.5,.9,.4]} material={m.ice} geometry={g.heroBlade}/>
+      <mesh position={[-1.42,-.5,.2]} material={m.ice} geometry={g.heroNode}/>
+      <mesh position={[-.64,1.12,.54]} material={m.energy} geometry={g.heroNode}/>
+      <mesh position={[.08,.7,-.26]} material={m.ice} geometry={g.heroNode}/>
+      <mesh position={[.78,-.74,.7]} material={m.energy} geometry={g.heroNode}/>
+      <mesh position={[1.42,.4,.14]} material={m.ice} geometry={g.heroNode}/>
     </group>
 
-    <group ref={kairosRef} rotation={[-.3,.56,.05]}>
+    <group ref={kairosRef} rotation={baseRotation.kairos}>
       <mesh scale={[1.62,1.12,1.12]} material={m.kraft} geometry={g.box}/>
       <lineSegments scale={[1.625,1.125,1.125]} geometry={g.edges} material={m.edge}/>
       <mesh position={[0,0,.575]} scale={[.25,1.125,.025]} material={m.tape} geometry={g.box}/>
@@ -237,15 +293,15 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[.43,-.11,.615]} scale={[.26,.028,.01]} material={m.deep} geometry={g.box}/>
     </group>
 
-    <group ref={kalintangRef} rotation={[.02,-.28,-.55]}>
-      <mesh position={[.16,.27,0]} scale={[.92,.92,.92]} material={m.meat} geometry={g.drumstick}/>
-      <mesh position={[-.55,-.76,.02]} rotation={[0,0,-.03]} scale={[.16,.78,.16]} material={m.bone} geometry={g.cylinder}/>
-      <mesh position={[-.66,-1.16,.03]} scale={[.2,.17,.16]} material={m.bone} geometry={g.sphere}/>
-      <mesh position={[-.42,-1.18,.03]} scale={[.2,.17,.16]} material={m.bone} geometry={g.sphere}/>
-      <mesh position={[.13,.45,.2]} scale={[.32,.42,.08]} material={m.meatLight} geometry={g.sphere}/>
+    <group ref={kalintangRef} rotation={baseRotation.kalintang}>
+      <mesh position={[0,.15,0]} scale={[1.04,1.04,1.04]} material={m.meat} geometry={g.drumstick}/>
+      <mesh position={[-.22,-.79,.01]} rotation={[0,0,0]} scale={[.14,.64,.14]} material={m.bone} geometry={g.cylinder}/>
+      <mesh position={[-.32,-1.14,.02]} scale={[.17,.15,.15]} material={m.bone} geometry={g.sphere}/>
+      <mesh position={[-.11,-1.16,.02]} scale={[.17,.15,.15]} material={m.bone} geometry={g.sphere}/>
+      <mesh position={[.08,.47,.2]} scale={[.34,.44,.075]} material={m.meatLight} geometry={g.sphere}/>
     </group>
 
-    <group ref={sambutRef} rotation={[-.08,.18,.02]}>
+    <group ref={sambutRef} rotation={baseRotation.sambut}>
       <mesh material={m.med} geometry={g.card}/>
       <mesh position={[0,.8,.01]} scale={[.42,.24,.8]} material={m.silver} geometry={g.smallRounded}/>
       <mesh position={[-.66,.12,.11]} scale={[.12,.42,.08]} material={m.teal} geometry={g.box}/>
@@ -256,7 +312,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[.55,-.43,.12]} scale={[.3,.045,.035]} material={m.silver} geometry={g.box}/>
     </group>
 
-    <group ref={colorsRef} rotation={[-.08,.18,-.02]}>
+    <group ref={colorsRef} rotation={baseRotation.colors}>
       <mesh material={m.camera} geometry={g.cameraBody}/>
       <mesh position={[-.46,.76,.02]} scale={[.72,.34,.9]} material={m.camera} geometry={g.smallRounded}/>
       <mesh position={[.83,.46,.23]} scale={[.28,.16,.08]} material={m.silver} geometry={g.box}/>
@@ -266,30 +322,33 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[-.82,.65,.25]} rotation={[Math.PI/2,0,0]} scale={[.09,.1,.09]} material={m.energy} geometry={g.cylinder}/>
     </group>
 
-    <group ref={aetherRef} rotation={[-.28,.46,.08]}>
-      <mesh scale={[1.35,1.35,1.35]} material={m.glass} geometry={g.box}/>
-      <lineSegments scale={[1.36,1.36,1.36]} geometry={g.edges} material={m.edge}/>
-      <mesh position={[.88,.72,.56]} scale={[.36,.36,.36]} material={m.ice} geometry={g.box}/>
-      <lineSegments position={[.88,.72,.56]} scale={[.365,.365,.365]} geometry={g.edges} material={m.edge}/>
-      <mesh position={[1.05,0,0]} rotation={[0,0,-Math.PI/2]} scale={[.055,1.05,.055]} material={m.xAxis} geometry={g.cylinder}/>
-      <mesh position={[2.08,0,0]} rotation={[0,0,-Math.PI/2]} material={m.xAxis} geometry={g.cone}/>
-      <mesh position={[0,1.05,0]} scale={[.055,1.05,.055]} material={m.yAxis} geometry={g.cylinder}/>
-      <mesh position={[0,2.08,0]} material={m.yAxis} geometry={g.cone}/>
-      <mesh position={[0,0,1.05]} rotation={[Math.PI/2,0,0]} scale={[.055,1.05,.055]} material={m.zAxis} geometry={g.cylinder}/>
-      <mesh position={[0,0,2.08]} rotation={[Math.PI/2,0,0]} material={m.zAxis} geometry={g.cone}/>
+    <group ref={aetherRef} rotation={baseRotation.aether}>
+      <mesh scale={[1.02,1.02,1.02]} material={m.aether} geometry={g.box}/>
+      <lineSegments scale={[1.03,1.03,1.03]} geometry={g.edges} material={m.edge}/>
+      <mesh position={[.72,.58,.46]} scale={[.3,.3,.3]} material={m.ice} geometry={g.box}/>
+      <lineSegments position={[.72,.58,.46]} scale={[.305,.305,.305]} geometry={g.edges} material={m.edge}/>
+      <mesh position={[.55,0,0]} rotation={[0,0,-Math.PI/2]} scale={[.05,1.1,.05]} material={m.xAxis} geometry={g.cylinder}/>
+      <mesh position={[1.18,0,0]} rotation={[0,0,-Math.PI/2]} material={m.xAxis} geometry={g.cone}/>
+      <mesh position={[0,.55,0]} scale={[.05,1.1,.05]} material={m.yAxis} geometry={g.cylinder}/>
+      <mesh position={[0,1.18,0]} material={m.yAxis} geometry={g.cone}/>
+      <mesh position={[0,0,.55]} rotation={[Math.PI/2,0,0]} scale={[.05,1.1,.05]} material={m.zAxis} geometry={g.cylinder}/>
+      <mesh position={[0,0,1.18]} rotation={[Math.PI/2,0,0]} material={m.zAxis} geometry={g.cone}/>
     </group>
 
-    <group ref={naraRef} rotation={[-.24,.18,-.03]}>
-      <mesh rotation={[Math.PI/2,0,0]} scale={[1.08,.12,1.08]} material={m.plate} geometry={g.plate}/>
-      <mesh position={[0,0,.12]} rotation={[Math.PI/2,0,0]} scale={[.72,.08,.72]} material={m.ice} geometry={g.plate}/>
-      <mesh position={[-1.22,-.08,.08]} scale={[.09,.82,.07]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.38,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.28,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.18,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.08,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[.36,.22,.26]} scale={[.22,.18,.12]} material={m.green} geometry={g.sphere}/>
-      <mesh position={[-.18,.34,.25]} scale={[.18,.16,.1]} material={m.food} geometry={g.sphere}/>
-      <mesh position={[.08,-.28,.25]} scale={[.2,.16,.11]} material={m.meatLight} geometry={g.sphere}/>
+    <group ref={naraRef} rotation={baseRotation.nara}>
+      <mesh rotation={[Math.PI/2,0,0]} scale={[1.02,.12,1.02]} material={m.plate} geometry={g.plate}/>
+      <mesh position={[0,0,.1]} material={m.silver} geometry={g.torus} scale={[.92,.92,.92]}/>
+      <mesh position={[0,0,.13]} rotation={[Math.PI/2,0,0]} scale={[.72,.07,.72]} material={m.ice} geometry={g.plate}/>
+      <mesh position={[-1.22,-.08,.1]} scale={[.075,.7,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.34,.66,.1]} scale={[.026,.22,.045]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.26,.66,.1]} scale={[.026,.22,.045]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.18,.66,.1]} scale={[.026,.22,.045]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.10,.66,.1]} scale={[.026,.22,.045]} material={m.silver} geometry={g.box}/>
+      <mesh position={[1.18,-.12,.1]} scale={[.075,.72,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[1.18,.6,.1]} scale={[.18,.3,.05]} material={m.ice} geometry={g.box}/>
+      <mesh position={[.36,.24,.27]} scale={[.24,.2,.13]} material={m.green} geometry={g.sphere}/>
+      <mesh position={[-.2,.33,.27]} scale={[.22,.19,.12]} material={m.food} geometry={g.sphere}/>
+      <mesh position={[.02,-.28,.27]} scale={[.24,.18,.12]} material={m.meatLight} geometry={g.sphere}/>
     </group>
 
     <group ref={core} visible={false}>
@@ -306,18 +365,20 @@ function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
   const {invalidate,gl}=useThree();
   const m=useMaterials(dark);
   const g=useMemo(()=>({
-    bar:extrude(roundedRectShape(1,.3,.13),.22,.045),
+    four:extrude(digitFourShape(),.24,.045),
     torus:new THREE.TorusGeometry(.72,.115,20,112),
   }),[]);
-  useEffect(()=>()=>{g.bar.dispose();g.torus.dispose();},[g]);
+  useEffect(()=>()=>{g.four.dispose();g.torus.dispose();},[g]);
   useEffect(()=>{const timer=window.setInterval(()=>{if(!document.hidden)invalidate();},40);return()=>window.clearInterval(timer);},[invalidate]);
 
   useFrame(({clock},delta)=>{
     const dx=target.current.x*.16-current.current.x,dy=-target.current.y*.12-current.current.y,alpha=1-Math.exp(-10*delta);
     current.current.x+=dx*alpha;current.current.y+=dy*alpha;
     if(group.current){
-      group.current.rotation.x=current.current.y*.55+Math.sin(clock.elapsedTime*.42)*.015;
-      group.current.rotation.y=current.current.x*.5+Math.sin(clock.elapsedTime*.36+.5)*.018;
+      group.current.position.y=Math.sin(clock.elapsedTime*.46)*.035;
+      group.current.rotation.x=current.current.y*.55+Math.sin(clock.elapsedTime*.34)*.022;
+      group.current.rotation.y=current.current.x*.5+Math.sin(clock.elapsedTime*.31+.5)*.026;
+      group.current.rotation.z=Math.sin(clock.elapsedTime*.27)*.012;
     }
     if(left.current){left.current.position.y=Math.sin(clock.elapsedTime*.72)*.035+current.current.y*.15;left.current.rotation.z=-.025+Math.sin(clock.elapsedTime*.58)*.018-current.current.x*.08;}
     if(right.current){right.current.position.y=Math.sin(clock.elapsedTime*.72+1.2)*.035-current.current.y*.12;right.current.rotation.z=.025+Math.sin(clock.elapsedTime*.58+1.4)*.018+current.current.x*.08;}
@@ -330,17 +391,13 @@ function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
-  return <group ref={group} scale={.92}>
-    <group ref={left} position={[-1.3,0,0]}>
-      <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
-      <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
-      <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
+  return <group ref={group} scale={.9}>
+    <group ref={left} position={[-1.28,0,0]}>
+      <mesh material={m.energy} geometry={g.four}/>
     </group>
     <mesh ref={zero} position={[0,0,.02]} material={m.silver} geometry={g.torus}/>
-    <group ref={right} position={[1.3,0,0]}>
-      <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
-      <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
-      <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
+    <group ref={right} position={[1.28,0,0]}>
+      <mesh material={m.energy} geometry={g.four}/>
     </group>
   </group>;
 }

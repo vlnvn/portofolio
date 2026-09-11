@@ -127,12 +127,12 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
 
     const steps:{state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number}[]=[
       {state:"hero",section:"#top",anchor:".hero .portrait",side:"hero",scale:1},
-      {state:"kairos",section:"#kairos",anchor:"#kairos .media-primary",side:"right",scale:.92},
-      {state:"kalintang",section:"#ayam-kalintang",anchor:"#ayam-kalintang .media-primary",side:"left",scale:.94},
-      {state:"sambut",section:"#sambut",anchor:"#sambut .media-primary",side:"right",scale:.9},
-      {state:"colors",section:"#colors",anchor:"#colors .media-primary",side:"left",scale:.92},
-      {state:"aether",section:"#aether3d",anchor:"#aether3d .media-primary",side:"left",scale:.94},
-      {state:"nara",section:"#nara",anchor:"#nara .media-primary",side:"right",scale:.9},
+      {state:"kairos",section:"#kairos",anchor:"#kairos .media-primary",side:"right",scale:1.08},
+      {state:"kalintang",section:"#ayam-kalintang",anchor:"#ayam-kalintang .media-primary",side:"left",scale:1.08},
+      {state:"sambut",section:"#sambut",anchor:"#sambut .media-primary",side:"left",scale:1.08},
+      {state:"colors",section:"#colors",anchor:"#colors .media-primary",side:"right",scale:.82},
+      {state:"aether",section:"#aether3d",anchor:"#aether3d .media-primary",side:"left",scale:.92},
+      {state:"nara",section:"#nara",anchor:"#nara .media-primary",side:"left",scale:1.0},
       {state:"hero",section:"#contact",anchor:"#contact",side:"contact",scale:.82},
     ];
 
@@ -145,7 +145,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       if(side==="contact")return {x:clamp(innerWidth-width*.68,minX,maxX),y:clamp(innerHeight-height*.68,minY,maxY),scale};
       const overlap=width*.16;
       const x=side==="left"?rect.left+overlap:rect.right-overlap;
-      const y=rect.bottom-height*.16;
+      const y=rect.bottom-height*.42;
       return {x:clamp(x,minX,maxX),y:clamp(y,minY,maxY),scale};
     };
 
