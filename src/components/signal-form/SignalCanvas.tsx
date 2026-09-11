@@ -123,30 +123,32 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
       }
       document.documentElement.dataset.lightfieldFrames=String((Number(document.documentElement.dataset.lightfieldFrames)||0)+1);
 
+      applyHostResponse(pointerAllowed);
+    };
+
+    const applyHostResponse=(pointerAllowed:boolean)=>{
       const host=document.querySelector<HTMLElement>(hostSelector);
-      if(host){
-        const bounds=host.getBoundingClientRect();
-        const visible=bounds.bottom>0&&bounds.top<innerHeight;
-        const responsive=pointerAllowed&&visible;
-        const hx=responsive?clamp((pointer.clientX-bounds.left)/Math.max(bounds.width,1)*2-1):0;
-        const hy=responsive?clamp((pointer.clientY-bounds.top)/Math.max(bounds.height,1)*2-1):0;
-        document.documentElement.dataset.kineticHost=visible?"visible":"hidden";
-        const changed=Math.abs(lastHost.current.x-hx)>.0005||Math.abs(lastHost.current.y-hy)>.0005;
-        if(changed){
-          lastHost.current={x:hx,y:hy};
-          setTilt(current=>Math.abs(current.x-hx)<.0005&&Math.abs(current.y-hy)<.0005?current:{x:hx,y:hy});
-          const portrait=host.querySelector<HTMLElement>(".portrait");
-          if(portrait){
-            setValue(portrait,"--portrait-x",hx*18);
-            setValue(portrait,"--portrait-y",hy*13);
-            setValue(portrait,"--portrait-rx",-hy*2.4,"deg");
-            setValue(portrait,"--portrait-ry",hx*3.0,"deg");
-            setValue(portrait,"--portrait-light-x",hx*52);
-            setValue(portrait,"--portrait-light-y",hy*42);
-            setValue(portrait,"--portrait-shadow-x",-hx*20);
-            setValue(portrait,"--portrait-shadow-y",30-hy*14);
-          }
-        }
+      if(!host){document.documentElement.dataset.kineticHost="missing";return;}
+      const bounds=host.getBoundingClientRect();
+      const visible=bounds.bottom>0&&bounds.top<innerHeight;
+      const responsive=pointerAllowed&&visible;
+      const hx=responsive?clamp((pointer.clientX-bounds.left)/Math.max(bounds.width,1)*2-1):0;
+      const hy=responsive?clamp((pointer.clientY-bounds.top)/Math.max(bounds.height,1)*2-1):0;
+      document.documentElement.dataset.kineticHost=visible?"visible":"hidden";
+      const changed=Math.abs(lastHost.current.x-hx)>.0005||Math.abs(lastHost.current.y-hy)>.0005;
+      if(!changed)return;
+      lastHost.current={x:hx,y:hy};
+      setTilt(current=>Math.abs(current.x-hx)<.0005&&Math.abs(current.y-hy)<.0005?current:{x:hx,y:hy});
+      const portrait=host.querySelector<HTMLElement>(".portrait");
+      if(portrait){
+        setValue(portrait,"--portrait-x",hx*18);
+        setValue(portrait,"--portrait-y",hy*13);
+        setValue(portrait,"--portrait-rx",-hy*2.4,"deg");
+        setValue(portrait,"--portrait-ry",hx*3.0,"deg");
+        setValue(portrait,"--portrait-light-x",hx*52);
+        setValue(portrait,"--portrait-light-y",hy*42);
+        setValue(portrait,"--portrait-shadow-x",-hx*20);
+        setValue(portrait,"--portrait-shadow-y",30-hy*14);
       }
     };
 
@@ -156,9 +158,10 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
       pointer.x=clamp(event.clientX/innerWidth*2-1);pointer.y=clamp(event.clientY/innerHeight*2-1);
       pointer.active=true;
       document.documentElement.dataset.kineticInput="mouse";
+      applyHostResponse(!reduced.matches&&desktopMotion.matches);
       schedule();
     };
-    const reset=()=>{pointer.active=false;pointer.x=0;pointer.y=0;schedule();};
+    const reset=()=>{pointer.active=false;pointer.x=0;pointer.y=0;applyHostResponse(false);schedule();};
 
     update();
     window.addEventListener("mousemove",onMouse,{passive:true});
