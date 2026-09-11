@@ -30,7 +30,7 @@ export function ChapterMotionController(){
       frame=0;
       const viewport=Math.max(innerHeight,1);
       const mobile=innerWidth<700;
-      const amplitude=reduced.matches?0:(mobile?.34:1);
+      const amplitude=reduced.matches?0:(mobile ? .34 : 1);
       chapters.forEach(chapter=>{
         const rect=chapter.getBoundingClientRect();
         const range=viewport*.5+rect.height*.5;
