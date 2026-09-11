@@ -174,7 +174,10 @@ test("NARA nutrition compass stays in one stable semantic model during idle moti
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-state"),{timeout:4000}).toBe("nara");
-  await expect.poll(()=>page.locator("html").getAttribute("data-nara-model"),{timeout:2000}).toBe("nutrition-compass-v2");
+  await expect.poll(()=>page.locator("html").getAttribute("data-nara-model"),{timeout:2000}).toBe("nutrition-mark-v3");
   await page.waitForTimeout(900);
-  await expect(page.locator("html")).toHaveAttribute("data-nara-model","nutrition-compass-v2");
+  await expect(page.locator("html")).toHaveAttribute("data-nara-model","nutrition-mark-v3");
 });
+
+
+test("professional context follows selected work",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","profile structure probe runs once");await page.goto("/");await expect(page.locator("#profile")).toHaveCount(1);await expect(page.locator("#profile .capability-grid article")).toHaveCount(3);const n=await page.locator("#nara").evaluate(el=>el.getBoundingClientRect().top+scrollY);const p=await page.locator("#profile").evaluate(el=>el.getBoundingClientRect().top+scrollY);expect(p).toBeGreaterThan(n);});

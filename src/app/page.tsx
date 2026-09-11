@@ -1,6 +1,7 @@
 import { AdaptiveNav } from "@/components/portfolio/AdaptiveNav";
 import { SignalCanvas } from "@/components/signal-form/SignalCanvas";
 import { ContactFooter } from "@/components/portfolio/ContactFooter";
+import { ProfileCapabilities } from "@/components/portfolio/ProfileCapabilities";
 import { Hero } from "@/components/portfolio/Hero";
 import { ProjectChapter } from "@/components/portfolio/ProjectChapter";
 import { projects, siteLinks } from "@/lib/projects";
@@ -20,7 +21,7 @@ export default function Home() {
     <a className="skip-link" href="#main">Skip to content</a>
     <AdaptiveNav/>
     <SignalCanvas persistent/>
-    <main id="main"><Hero/>{projects.map(project=><ProjectChapter key={project.id} project={project}/>)}</main>
+    <main id="main"><Hero/>{projects.map(project=><ProjectChapter key={project.id} project={project}/>)}<ProfileCapabilities/></main>
     <ContactFooter/>
   </>;
 }
