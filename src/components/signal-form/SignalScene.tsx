@@ -90,7 +90,8 @@ function KineticInput({target}:{target:MotionRef}){
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const move=(event:MouseEvent)=>{
       if(reduced.matches)return;
-      const rect=gl.domElement.getBoundingClientRect();
+      const host=gl.domElement.closest(".signal-layer") as HTMLElement|null;
+      const rect=(host??gl.domElement).getBoundingClientRect();
       const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
       const nx=(event.clientX-cx)/Math.max(rect.width*.5,1);
       const ny=(event.clientY-cy)/Math.max(rect.height*.5,1);
