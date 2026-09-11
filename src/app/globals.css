@@ -568,3 +568,45 @@ html[data-signal-fallback="true"] .hero-static-artifact{display:block}
 
 .profile-intro,.capability-grid,.capability-grid article{min-width:0}
 .profile-intro h2,.profile-intro>p,.capability-grid span{overflow-wrap:anywhere}
+
+/* V4.1 context-first portfolio structure */
+.profile-capabilities{
+  margin:24px 0 76px;
+  padding-top:30px;
+  padding-bottom:18px;
+  grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
+  gap:clamp(42px,6vw,86px);
+  min-height:0;
+  overflow:hidden;
+}
+.profile-intro{max-width:560px}
+.profile-intro h2{
+  max-width:18ch;
+  margin:0 0 18px;
+  font-size:clamp(1.85rem,3vw,3.1rem);
+  line-height:1.05;
+  letter-spacing:-.035em;
+  font-weight:540;
+}
+.profile-intro>p:not(.section-kicker){
+  max-width:54ch;
+  font-size:clamp(.95rem,1.1vw,1.05rem);
+  line-height:1.65;
+}
+.profile-links{display:none}
+.capability-grid article{
+  grid-template-columns:34px minmax(128px,.72fr) minmax(0,1fr);
+  gap:16px;
+  padding:17px 0;
+}
+.capability-grid h3{font-size:.94rem}
+.capability-grid span{font-size:.8rem;line-height:1.48}
+@media(max-width:900px){
+  .profile-capabilities{grid-template-columns:1fr;gap:36px;margin-top:10px;margin-bottom:54px}
+  .profile-intro h2{max-width:22ch}
+}
+@media(max-width:699px){
+  .profile-capabilities{padding-top:24px;padding-bottom:6px}
+  .capability-grid article{grid-template-columns:30px minmax(0,1fr)}
+  .capability-grid span{grid-column:2}
+}

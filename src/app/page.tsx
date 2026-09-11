@@ -21,7 +21,7 @@ export default function Home() {
     <a className="skip-link" href="#main">Skip to content</a>
     <AdaptiveNav/>
     <SignalCanvas persistent/>
-    <main id="main"><Hero/>{projects.map(project=><ProjectChapter key={project.id} project={project}/>)}<ProfileCapabilities/></main>
+    <main id="main"><Hero/><ProfileCapabilities/>{projects.map(project=><ProjectChapter key={project.id} project={project}/>)}</main>
     <ContactFooter/>
   </>;
 }

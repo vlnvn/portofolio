@@ -77,7 +77,24 @@ function annularSectorGeometry(inner:number,outer:number,start:number,end:number
   return extrude(shape,.11,.018);
 }
 
-function appleGeometry(){const s=new THREE.Shape();s.moveTo(0,-1.02);s.bezierCurveTo(-.56,-1,-.98,-.55,-.98,.05);s.bezierCurveTo(-.98,.58,-.64,.98,-.24,.98);s.bezierCurveTo(-.08,.98,-.02,.82,0,.7);s.bezierCurveTo(.04,.82,.12,.98,.28,.98);s.bezierCurveTo(.68,.98,1,.58,1,.05);s.bezierCurveTo(1,-.55,.58,-1,0,-1.02);return extrude(s,.34,.055)}
+function appleGeometry(){
+  const profile=[
+    new THREE.Vector2(0,-1.03),
+    new THREE.Vector2(.30,-.99),
+    new THREE.Vector2(.64,-.83),
+    new THREE.Vector2(.88,-.52),
+    new THREE.Vector2(1,-.08),
+    new THREE.Vector2(.96,.34),
+    new THREE.Vector2(.82,.67),
+    new THREE.Vector2(.61,.9),
+    new THREE.Vector2(.35,.86),
+    new THREE.Vector2(.17,.72),
+    new THREE.Vector2(0,.7),
+  ];
+  const geometry=new THREE.LatheGeometry(profile,72);
+  geometry.computeVertexNormals();
+  return geometry;
+}
 
 function leafGeometry(){
   const shape=new THREE.Shape();
@@ -165,6 +182,8 @@ function useMaterials(dark:boolean){
     green:new THREE.MeshStandardMaterial({color:"#55976E",roughness:.45,metalness:0}),
     food:new THREE.MeshStandardMaterial({color:"#D49A42",roughness:.48,metalness:0}),
     fruit:new THREE.MeshStandardMaterial({color:"#D87888",roughness:.38,metalness:.03}),
+    apple:new THREE.MeshPhysicalMaterial({color:"#C92F3C",roughness:.24,metalness:.02,clearcoat:.68,clearcoatRoughness:.18}),
+    stem:new THREE.MeshStandardMaterial({color:"#6D472D",roughness:.58,metalness:0}),
     carb:new THREE.MeshStandardMaterial({color:"#E5B361",roughness:.4,metalness:.02}),
     protein:new THREE.MeshStandardMaterial({color:"#869FE0",roughness:.34,metalness:.06}),
     xAxis:new THREE.MeshStandardMaterial({color:"#FF8F8A",roughness:.28,metalness:.12}),
@@ -305,7 +324,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
     document.documentElement.dataset.signalTilt=`${current.current.x.toFixed(3)},${current.current.y.toFixed(3)}`;
     document.documentElement.dataset.signalState=settled?from:`${from}-${to}`;
-    if(settled&&from==="nara")document.documentElement.dataset.naraModel="nutrition-mark-v3";else delete document.documentElement.dataset.naraModel;
+    if(settled&&from==="nara")document.documentElement.dataset.naraModel="red-apple-v4";else delete document.documentElement.dataset.naraModel;
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
@@ -375,7 +394,11 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[0,0,1.18]} rotation={[Math.PI/2,0,0]} material={m.zAxis} geometry={g.cone}/>
     </group>
 
-    <group ref={naraRef} rotation={baseRotation.nara}><mesh position={[0,0,.02]} scale={[.94,.94,.94]} material={m.med} geometry={g.naraApple}/><mesh position={[.12,1.03,.24]} rotation={[0,0,.54]} scale={[.72,.72,.72]} material={m.green} geometry={g.naraLeaf}/><mesh position={[-.05,1.08,.12]} rotation={[0,0,-.08]} scale={[.055,.33,.055]} material={m.deep} geometry={g.cylinder}/><mesh position={[0,0,-.26]} rotation={[1.02,.18,.15]} scale={[1.24,1.24,1.24]} material={m.silver} geometry={g.thinTorus}/><mesh position={[-.78,.08,.42]} scale={.11} material={m.fruit} geometry={g.sphere}/><mesh position={[.7,.44,.34]} scale={.095} material={m.carb} geometry={g.sphere}/><mesh position={[.64,-.52,.38]} scale={.105} material={m.protein} geometry={g.sphere}/><mesh position={[0,-.18,.43]} scale={[.18,.18,.08]} material={m.green} geometry={g.sphere}/></group>
+    <group ref={naraRef} rotation={baseRotation.nara}>
+      <mesh position={[0,-.02,0]} scale={[.9,.94,.9]} material={m.apple} geometry={g.naraApple}/>
+      <mesh position={[-.03,.93,.02]} rotation={[0,0,-.1]} scale={[.065,.38,.065]} material={m.stem} geometry={g.cylinder}/>
+      <mesh position={[.18,1.04,.06]} rotation={[.05,-.12,.56]} scale={[.78,.78,.78]} material={m.green} geometry={g.naraLeaf}/>
+    </group>
 
     <group ref={core} visible={false}>
       <mesh rotation={[1.08,.3,.1]} material={m.energy} geometry={g.torus}/>

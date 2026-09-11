@@ -169,15 +169,32 @@ test("rapid scroll uses inertial artifact travel instead of teleporting",async({
 });
 
 
-test("NARA nutrition compass stays in one stable semantic model during idle motion",async({page},testInfo)=>{
+test("NARA red apple stays in one stable semantic model during idle motion",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="chromium","NARA model probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-state"),{timeout:4000}).toBe("nara");
-  await expect.poll(()=>page.locator("html").getAttribute("data-nara-model"),{timeout:2000}).toBe("nutrition-mark-v3");
+  await expect.poll(()=>page.locator("html").getAttribute("data-nara-model"),{timeout:2000}).toBe("red-apple-v4");
   await page.waitForTimeout(900);
-  await expect(page.locator("html")).toHaveAttribute("data-nara-model","nutrition-mark-v3");
+  await expect(page.locator("html")).toHaveAttribute("data-nara-model","red-apple-v4");
 });
 
 
-test("professional context follows selected work",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","profile structure probe runs once");await page.goto("/");await expect(page.locator("#profile")).toHaveCount(1);await expect(page.locator("#profile .capability-grid article")).toHaveCount(3);const n=await page.locator("#nara").evaluate(el=>el.getBoundingClientRect().top+scrollY);const p=await page.locator("#profile").evaluate(el=>el.getBoundingClientRect().top+scrollY);expect(p).toBeGreaterThan(n);});
+test("professional context bridges hero and selected work",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","profile structure probe runs once");
+  await page.goto("/");
+  await expect(page.locator("#profile")).toHaveCount(1);
+  await expect(page.locator("#profile .capability-grid article")).toHaveCount(3);
+  const hero=await page.locator("#top").evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  const profile=await page.locator("#profile").evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  const firstProject=await page.locator("#kairos").evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  expect(profile).toBeGreaterThan(hero);
+  expect(profile).toBeLessThan(firstProject);
+});
+
+test("NARA begins closing back to aperture before contact occupies the viewport",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","final semantic handoff probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  await page.evaluate(()=>{const contact=document.getElementById("contact");if(contact)scrollTo(0,contact.offsetTop-innerHeight*.86);});
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("hero");
+});

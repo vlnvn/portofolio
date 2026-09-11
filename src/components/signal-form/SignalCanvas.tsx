@@ -58,7 +58,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
   useEffect(()=>{
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const desktopMotion=matchMedia("(min-width: 700px)");
-    const sections=Array.from(document.querySelectorAll<HTMLElement>(".hero,.project-chapter,.contact,.not-found"));
+    const sections=Array.from(document.querySelectorAll<HTMLElement>(".hero,.profile-capabilities,.project-chapter,.contact,.not-found"));
     const pointer={x:0,y:0,clientX:innerWidth/2,clientY:innerHeight/2,active:false};
     let frame=0;
     const setValue=(element:HTMLElement,name:string,value:number,unit="px")=>element.style.setProperty(name,`${value.toFixed(2)}${unit}`);
@@ -75,6 +75,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
         case "sambut": return {ax:(-250+progress*54+px*24)*responsive,ay:(-22+py*22)*responsive,bx:(250-progress*54-px*24)*responsive,by:(18-py*22)*responsive,scaleA:1.04,scaleB:1.04,opacityA:.66,opacityB:.62};
         case "colors": return {ax:(-28+progress*30+px*18)*responsive,ay:(40+progress*18+py*14)*responsive,bx:(118-progress*20-px*12)*responsive,by:(-64+progress*14+py*10)*responsive,scaleA:1.2,scaleB:1.24,opacityA:.58,opacityB:.52};
         case "aether3d": return {ax:(-210+progress*78+px*34)*responsive,ay:(28-progress*44+py*24)*responsive,bx:(245-progress*66-px*28)*responsive,by:(-128+progress*34-py*18)*responsive,scaleA:1.13,scaleB:1.18,opacityA:.82,opacityB:.72};
+        case "profile": return {ax:(155+progress*34+px*16)*responsive,ay:(-42+py*14)*responsive,bx:(-165-progress*24-px*12)*responsive,by:(58+progress*16)*responsive,scaleA:1.05,scaleB:1.08,opacityA:.5,opacityB:.44};
         case "nara": return {ax:(110+progress*38+px*14)*responsive,ay:(68+py*12)*responsive,bx:(-135-progress*26-px*10)*responsive,by:(-52+progress*12)*responsive,scaleA:1.08,scaleB:1.04,opacityA:.52,opacityB:.46};
         case "contact": return {ax:(-70+progress*20+px*10)*responsive,ay:(110+py*8)*responsive,bx:(92-progress*18-px*8)*responsive,by:(72-py*6)*responsive,scaleA:1.14,scaleB:1.1,opacityA:.48,opacityB:.42};
         default:return {ax:(90+px*34)*responsive,ay:(-40+py*24)*responsive,bx:(-105-px*20)*responsive,by:(88-py*18)*responsive,scaleA:1.1,scaleB:1.16,opacityA:.66,opacityB:.58};
@@ -170,15 +171,18 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       let from=items[0],to=items[0],mix=0;
       for(let index=1;index<items.length;index++){
         const item=items[index],previous=items[index-1];
-        if(item.top<=settle){from=item;to=item;mix=0;continue;}
-        if(item.top<start){from=previous;to=item;mix=smoothstep((start-item.top)/(start-settle));}
+        const itemStart=item.side==="contact"?innerHeight*.98:start;
+        const itemSettle=item.side==="contact"?innerHeight*.68:settle;
+        if(item.top<=itemSettle){from=item;to=item;mix=0;continue;}
+        if(item.top<itemStart){from=previous;to=item;mix=smoothstep((itemStart-item.top)/(itemStart-itemSettle));}
         break;
       }
       const lift=Math.sin(Math.PI*mix)*22;
       target.x=lerp(from.point.x,to.point.x,mix);
       target.y=lerp(from.point.y,to.point.y,mix)-lift;
       target.scale=lerp(from.point.scale,to.point.scale,mix)*(1+Math.sin(Math.PI*mix)*.035);
-      target.state=mix>=.44?to.state:from.state;
+      const cutover=to.side==="contact"?.22:.44;
+      target.state=mix>=cutover?to.state:from.state;
       morph.pending=target.state;
       if(!initialized){
         visual.x=target.x;visual.y=target.y;visual.scale=target.scale;visual.state=target.state;
