@@ -56,6 +56,7 @@ export function SignalCanvas(){
   useEffect(()=>{
     const finePointer=matchMedia("(hover: hover) and (pointer: fine)");
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
+    const desktopMotion=matchMedia("(min-width: 700px)");
     const sections=Array.from(document.querySelectorAll<HTMLElement>(".hero,.project-chapter,.contact"));
     const pointer={x:0,y:0,clientX:innerWidth/2,clientY:innerHeight/2,active:false};
     let frame=0;
@@ -64,7 +65,7 @@ export function SignalCanvas(){
     const update=()=>{
       frame=0;
       document.documentElement.dataset.lightfieldFrames=String((Number(document.documentElement.dataset.lightfieldFrames)||0)+1);
-      const motionAllowed=!reduced.matches;
+      const motionAllowed=!reduced.matches&&desktopMotion.matches;
       const pointerAllowed=motionAllowed&&finePointer.matches&&pointer.active;
       const px=pointerAllowed?pointer.x:0;
       const py=pointerAllowed?pointer.y:0;
@@ -121,7 +122,8 @@ export function SignalCanvas(){
     document.documentElement.addEventListener("mouseleave",reset);
     reduced.addEventListener("change",schedule);
     finePointer.addEventListener("change",schedule);
-    return()=>{cancelAnimationFrame(frame);removeEventListener("pointermove",onPointer);removeEventListener("scroll",schedule);removeEventListener("resize",schedule);removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);reduced.removeEventListener("change",schedule);finePointer.removeEventListener("change",schedule);};
+    desktopMotion.addEventListener("change",schedule);
+    return()=>{cancelAnimationFrame(frame);removeEventListener("pointermove",onPointer);removeEventListener("scroll",schedule);removeEventListener("resize",schedule);removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);reduced.removeEventListener("change",schedule);finePointer.removeEventListener("change",schedule);desktopMotion.removeEventListener("change",schedule);};
   },[]);
 
   const webgl=eligible&&Scene&&!failed;
