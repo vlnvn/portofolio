@@ -96,7 +96,8 @@ function KineticInput({target}:{target:MotionRef}){
       const nx=(event.clientX-cx)/Math.max(rect.width*.5,1);
       const ny=(event.clientY-cy)/Math.max(rect.height*.5,1);
       const distance=Math.hypot(nx,ny);
-      const proximity=clamp01((1.85-distance)/1.05);
+      const inside=event.clientX>=rect.left&&event.clientX<=rect.right&&event.clientY>=rect.top&&event.clientY<=rect.bottom;
+      const proximity=inside?1:clamp01((1.95-distance)/1.1);
       target.current.x=clamp(nx)*proximity;
       target.current.y=clamp(ny)*proximity;
       target.current.proximity=proximity;
@@ -105,8 +106,9 @@ function KineticInput({target}:{target:MotionRef}){
       invalidate();
     };
     const reset=()=>{target.current.x=0;target.current.y=0;target.current.proximity=0;document.documentElement.dataset.signalTarget="0.000,0.000";document.documentElement.dataset.signalProximity="0.000";invalidate();};
+    document.documentElement.dataset.signalInput="ready";
     window.addEventListener("mousemove",move,{passive:true});window.addEventListener("blur",reset);document.documentElement.addEventListener("mouseleave",reset);
-    return()=>{window.removeEventListener("mousemove",move);window.removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);};
+    return()=>{delete document.documentElement.dataset.signalInput;window.removeEventListener("mousemove",move);window.removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);};
   },[gl,invalidate,target]);
   return null;
 }
