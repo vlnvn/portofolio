@@ -67,15 +67,26 @@ function ApertureRig({target,dark}:{target:MotionRef;dark:boolean}){
   const current=useRef({x:0,y:0});
   const introStart=useRef<number|null>(null);
   const {invalidate,gl}=useThree();
-  const bladeGeometry=useMemo(()=>new THREE.BoxGeometry(1,1,1),[]);
+  const bladeGeometry=useMemo(()=>new THREE.CylinderGeometry(.16,.34,1.28,5,1,false),[]);
+  const idleVisible=useRef(true);
   const nodeGeometry=useMemo(()=>new THREE.SphereGeometry(.085,18,12),[]);
+
+  useEffect(()=>{
+    const canvas=gl.domElement;
+    const observer=new IntersectionObserver(entries=>{idleVisible.current=entries.some(entry=>entry.isIntersecting);},{rootMargin:"120px"});
+    observer.observe(canvas);
+    const timer=window.setInterval(()=>{if(idleVisible.current&&!document.hidden)invalidate();},42);
+    return()=>{observer.disconnect();window.clearInterval(timer);};
+  },[gl,invalidate]);
 
   useFrame(({clock},delta)=>{
     if(introStart.current===null)introStart.current=clock.elapsedTime;
     const raw=Math.min(1,(clock.elapsedTime-introStart.current)/.82);
     const settle=1-Math.pow(1-raw,3);
-    const desiredX=-target.current.y*.34;
-    const desiredY=target.current.x*.46;
+    const idleX=Math.sin(clock.elapsedTime*.47)*.055+Math.sin(clock.elapsedTime*.19+.8)*.025;
+    const idleY=Math.cos(clock.elapsedTime*.39)*.07+Math.sin(clock.elapsedTime*.23)*.022;
+    const desiredX=-target.current.y*.30+idleX;
+    const desiredY=target.current.x*.41+idleY;
     const dx=desiredX-current.current.x;
     const dy=desiredY-current.current.y;
     const alpha=1-Math.exp(-9.8*delta);
@@ -89,7 +100,9 @@ function ApertureRig({target,dark}:{target:MotionRef;dark:boolean}){
       const depth=.5+index*.24;
       mesh.scale.setScalar(scale);
       mesh.position.set(ring.position[0]+ty*depth,ring.position[1]+(1-settle)*(index%2?-.28:.28)+tx*depth,ring.position[2]+ty*(index-1)*.2);
-      mesh.rotation.set(ring.rotation[0]+(1-settle)*(.52-index*.16)+tx*depth,ring.rotation[1]+(1-settle)*(.44-index*.12)+ty*depth,ring.rotation[2]+(1-settle)*(index%2?-.48:.52)+ty*.22);
+      const spin=[.19,-.145,.105][index]??.1;
+      const orbit=clock.elapsedTime*spin;
+      mesh.rotation.set(ring.rotation[0]+(1-settle)*(.52-index*.16)+tx*depth+Math.sin(clock.elapsedTime*.31+index)*.025,ring.rotation[1]+(1-settle)*(.44-index*.12)+ty*depth+Math.cos(clock.elapsedTime*.27+index)*.022,ring.rotation[2]+(1-settle)*(index%2?-.48:.52)+ty*.22+orbit);
     });
 
     bladeRefs.current.forEach((mesh,index)=>{
@@ -98,7 +111,7 @@ function ApertureRig({target,dark}:{target:MotionRef;dark:boolean}){
       const originScale=.3+.7*settle;
       const depth=.68+index*.18;
       mesh.position.set(blade.position[0]*originScale+ty*depth,blade.position[1]*originScale-tx*depth,blade.position[2]*settle+ty*.3);
-      mesh.rotation.set(blade.rotation[0]+(1-settle)*.74-tx*.58,blade.rotation[1]-(1-settle)*.58+ty*.68,blade.rotation[2]+(1-settle)*(index-1)*.74+tx*.24);
+      mesh.rotation.set(blade.rotation[0]+(1-settle)*.74-tx*.52+Math.sin(clock.elapsedTime*.36+index)*.035,blade.rotation[1]-(1-settle)*.58+ty*.62+Math.cos(clock.elapsedTime*.33+index)*.03,blade.rotation[2]+(1-settle)*(index-1)*.74+tx*.24+Math.sin(clock.elapsedTime*.29+index*1.7)*.055);
       mesh.scale.set(blade.scale[0]*settle,blade.scale[1]*settle,blade.scale[2]*settle);
     });
 
@@ -114,8 +127,8 @@ function ApertureRig({target,dark}:{target:MotionRef;dark:boolean}){
     if(rig.current){
       rig.current.rotation.x=-.08+tx;
       rig.current.rotation.y=.12+ty;
-      rig.current.rotation.z=ty*.1;
-      rig.current.position.set(ty*.34,-tx*.22,(Math.abs(tx)+Math.abs(ty))*.12);
+      rig.current.rotation.z=ty*.1+Math.sin(clock.elapsedTime*.22)*.025;
+      rig.current.position.set(ty*.34+Math.sin(clock.elapsedTime*.28)*.035,-tx*.22+Math.cos(clock.elapsedTime*.24)*.04,(Math.abs(tx)+Math.abs(ty))*.12+Math.sin(clock.elapsedTime*.31)*.025);
     }
 
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
