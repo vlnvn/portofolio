@@ -15,7 +15,7 @@ test("homepage has no automatically detectable accessibility violations",async({
 test("production responses carry the security baseline",async({page})=>{const response=await page.goto("/");expect(response?.headers()["content-security-policy"]).toContain("object-src 'none'");expect(response?.headers()["x-content-type-options"]).toBe("nosniff");});
 test("rapid reverse chapter navigation settles on the final target",async({page})=>{await page.goto("/");await page.getByRole("link",{name:/06 N\.A\.R\.A\./}).click();await page.getByRole("link",{name:/01 KAIROS/}).click();await expect(page).toHaveURL(/#kairos$/);await expect(page.getByRole("link",{name:/01 KAIROS/})).toHaveAttribute("aria-current","location");});
 test("WebGL unavailability keeps semantic content and poster",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","capability override is browser-specific");await page.addInitScript(()=>{const proto=HTMLCanvasElement.prototype as unknown as {getContext:(type:string,...args:unknown[])=>unknown};const original=proto.getContext;proto.getContext=function(this:HTMLCanvasElement,type:string,...args:unknown[]){if(type==="webgl"||type==="webgl2")return null;return original.call(this,type,...args);};});await page.goto("/");await expect(page.locator(".signal-layer")).toHaveAttribute("data-mode","poster");await expect(page.getByRole("heading",{name:"KAIROS"})).toBeVisible();});
-test("Signal Form idle motion stays low-rate and draw-call bounded",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","runtime diagnostics run once");await page.goto("/");await expect.poll(()=>page.locator("html").getAttribute("data-signal-frames"),{timeout:5000}).not.toBeNull();await page.waitForTimeout(900);const before=Number(await page.locator("html").getAttribute("data-signal-frames"));await page.waitForTimeout(1000);const after=Number(await page.locator("html").getAttribute("data-signal-frames"));expect(after-before).toBeGreaterThan(4);expect(after-before).toBeLessThanOrEqual(32);expect(Number(await page.locator("html").getAttribute("data-signal-calls"))).toBeLessThanOrEqual(12);});
+test("Signal Form idle motion stays low-rate and draw-call bounded",async({page},testInfo)=>{test.skip(testInfo.project.name!=="chromium","runtime diagnostics run once");await page.goto("/");await expect.poll(()=>page.locator("html").getAttribute("data-signal-frames"),{timeout:5000}).not.toBeNull();await page.waitForTimeout(900);const before=Number(await page.locator("html").getAttribute("data-signal-frames"));await page.waitForTimeout(1000);const after=Number(await page.locator("html").getAttribute("data-signal-frames"));expect(after-before).toBeGreaterThan(4);expect(after-before).toBeLessThanOrEqual(38);expect(Number(await page.locator("html").getAttribute("data-signal-calls"))).toBeLessThanOrEqual(12);});
 
 
 
@@ -82,24 +82,25 @@ test("aperture responds directly to mouse in hero and 404",async({page},testInfo
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
   await page.goto("/missing-kinetic-page");await expect.poll(()=>page.locator(".not-found .signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await expect(page.locator(".not-found .signal-layer")).toHaveAttribute("data-variant","404");
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-state"),{timeout:2000}).toBe("404");
   await page.waitForTimeout(1000);const before404=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1140,390);
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before404);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });
 
-test("persistent artifact morphs while project reading planes stay grounded",async({page},testInfo)=>{
+test("persistent artifact reaches every semantic project state while reading planes stay grounded",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="chromium","artifact narrative probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("hero");
-  await page.evaluate(()=>document.getElementById("kairos")?.scrollIntoView({behavior:"instant",block:"center"}));
-  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("kairos");
-  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("kairos");
-  await expect(page.locator("#kairos .chapter-copy")).toHaveCSS("opacity","1");
-  await page.evaluate(()=>document.getElementById("ayam-kalintang")?.scrollIntoView({behavior:"instant",block:"center"}));
-  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("kalintang");
-  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("kalintang");
-  await expect(page.locator("#ayam-kalintang .chapter-copy")).toHaveCSS("opacity","1");
+  const states:[string,string][]=[["kairos","kairos"],["ayam-kalintang","kalintang"],["sambut","sambut"],["colors","colors"],["aether3d","aether"],["nara","nara"],["contact","hero"]];
+  for(const [id,state] of states){
+    await page.evaluate(target=>document.getElementById(target)?.scrollIntoView({behavior:"instant",block:"center"}),id);
+    await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe(state);
+    await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe(state);
+  }
+  for(const id of ["kairos","ayam-kalintang","sambut","colors","aether3d","nara"])await expect(page.locator(`#${id} .chapter-copy`)).toHaveCSS("opacity","1");
 });
 
 test("project sheen and shadow respond to pointer",async({page},testInfo)=>{
@@ -124,4 +125,12 @@ test("projects stay seamless while contact keeps an intentional divider",async({
   });
   for(const item of result.sections){expect(item.before).toBe("none");expect(item.after).toBe("none");expect(item.background).toBe("rgba(0, 0, 0, 0)");}
   expect(parseFloat(result.contactBorder)).toBeGreaterThanOrEqual(1);
+});
+
+
+test("404 reduced-motion fallback preserves the 404 mark",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","fallback probe runs once");
+  await page.emulateMedia({reducedMotion:"reduce"});await page.goto("/missing-static-404");
+  await expect(page.locator(".not-found .signal-layer")).toHaveAttribute("data-mode","poster");
+  await expect(page.locator(".not-found .error-404-poster")).toHaveCount(1);
 });

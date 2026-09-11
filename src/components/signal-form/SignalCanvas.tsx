@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { StaticSignalPoster } from "./StaticSignalPoster";
+import { Static404Poster, StaticSignalPoster } from "./StaticSignalPoster";
 import type SignalSceneType from "./SignalScene";
 
 type SceneComponent=typeof SignalSceneType;
 type Ambient={ax:number;ay:number;bx:number;by:number;scaleA:number;scaleB:number;opacityA:number;opacityB:number};
-type ArtifactState="hero"|"kairos"|"kalintang";
+type ArtifactState="hero"|"kairos"|"kalintang"|"sambut"|"colors"|"aether"|"nara";
 type ArtifactDetail={from:ArtifactState;to:ArtifactState;t:number;opacity:number};
 
 const clamp=(value:number,min=-1,max=1)=>Math.max(min,Math.min(max,value));
 const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
 const smoothstep=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
 
-export function SignalCanvas({hostSelector=".hero",persistent=false}:{hostSelector?:string;persistent?:boolean}){
+export function SignalCanvas({hostSelector=".hero",persistent=false,variant="artifact"}:{hostSelector?:string;persistent?:boolean;variant?:"artifact"|"404"}){
   const layerRef=useRef<HTMLDivElement>(null);
   const [Scene,setScene]=useState<SceneComponent|null>(null);
   const [eligible,setEligible]=useState(false);
@@ -125,52 +125,62 @@ export function SignalCanvas({hostSelector=".hero",persistent=false}:{hostSelect
     const layer=layerRef.current;
     let frame=0;
 
-    const anchor=(element:HTMLElement,kind:ArtifactState)=>{
+    const steps:{state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number}[]=[
+      {state:"hero",section:"#top",anchor:".hero .portrait",side:"hero",scale:1},
+      {state:"kairos",section:"#kairos",anchor:"#kairos .media-primary",side:"right",scale:.92},
+      {state:"kalintang",section:"#ayam-kalintang",anchor:"#ayam-kalintang .media-primary",side:"left",scale:.94},
+      {state:"sambut",section:"#sambut",anchor:"#sambut .media-primary",side:"right",scale:.9},
+      {state:"colors",section:"#colors",anchor:"#colors .media-primary",side:"left",scale:.92},
+      {state:"aether",section:"#aether3d",anchor:"#aether3d .media-primary",side:"left",scale:.94},
+      {state:"nara",section:"#nara",anchor:"#nara .media-primary",side:"right",scale:.9},
+      {state:"hero",section:"#contact",anchor:"#contact",side:"contact",scale:.82},
+    ];
+
+    const anchorFor=(element:HTMLElement,side:"hero"|"left"|"right"|"contact",scale:number)=>{
       const rect=element.getBoundingClientRect();
-      if(kind==="hero")return {x:clamp(rect.left+rect.width*.82,170,innerWidth-170),y:clamp(rect.top+rect.height*.78,145,innerHeight-145),scale:1};
-      if(kind==="kairos")return {x:clamp(rect.right-46,170,innerWidth-170),y:clamp(rect.bottom-72,145,innerHeight-145),scale:.9};
-      return {x:clamp(rect.left+54,170,innerWidth-170),y:clamp(rect.bottom-78,145,innerHeight-145),scale:.92};
+      const width=layer?.offsetWidth||280,height=layer?.offsetHeight||225;
+      const minX=width*.52+14,maxX=innerWidth-width*.52-14;
+      const minY=112+height*.5,maxY=innerHeight-height*.52-14;
+      if(side==="hero")return {x:clamp(rect.left+width*.24,minX,maxX),y:clamp(rect.bottom-height*.22,minY,maxY),scale};
+      if(side==="contact")return {x:clamp(innerWidth-width*.68,minX,maxX),y:clamp(innerHeight-height*.68,minY,maxY),scale};
+      const overlap=width*.16;
+      const x=side==="left"?rect.left+overlap:rect.right-overlap;
+      const y=rect.bottom-height*.16;
+      return {x:clamp(x,minX,maxX),y:clamp(y,minY,maxY),scale};
     };
 
     const apply=()=>{
       frame=0;
       if(!layer)return;
-      const portrait=document.querySelector<HTMLElement>(".hero .portrait");
-      const kairos=document.querySelector<HTMLElement>("#kairos .project-media");
-      const kalintang=document.querySelector<HTMLElement>("#ayam-kalintang .project-media");
-      const kairosSection=document.getElementById("kairos");
-      const kalintangSection=document.getElementById("ayam-kalintang");
-      const sambutSection=document.getElementById("sambut");
-      if(!portrait||!kairos||!kalintang||!kairosSection||!kalintangSection||!sambutSection)return;
-
-      const heroAnchor=anchor(portrait,"hero");
-      const kairosAnchor=anchor(kairos,"kairos");
-      const kalintangAnchor=anchor(kalintang,"kalintang");
-      const kairosRect=kairosSection.getBoundingClientRect();
-      const kalintangRect=kalintangSection.getBoundingClientRect();
-      const sambutRect=sambutSection.getBoundingClientRect();
-      const start=innerHeight*.78,end=innerHeight*.38;
-      let from:ArtifactState="hero",to:ArtifactState="hero",t=0,opacity=1,a=heroAnchor,b=heroAnchor;
-
-      if(kairosRect.top<=start&&kairosRect.top>end){
-        from="hero";to="kairos";t=smoothstep((start-kairosRect.top)/(start-end));a=heroAnchor;b=kairosAnchor;
-      }else if(kairosRect.top<=end&&kalintangRect.top>start){
-        from="kairos";to="kairos";a=kairosAnchor;b=kairosAnchor;
-      }else if(kalintangRect.top<=start&&kalintangRect.top>end){
-        from="kairos";to="kalintang";t=smoothstep((start-kalintangRect.top)/(start-end));a=kairosAnchor;b=kalintangAnchor;
-      }else if(kalintangRect.top<=end){
-        from="kalintang";to="kalintang";a=kalintangAnchor;b=kalintangAnchor;
-        if(sambutRect.top<=innerHeight*.72)opacity=1-smoothstep((innerHeight*.72-sambutRect.top)/(innerHeight*.30));
+      const resolved=steps.map(step=>{
+        const section=document.querySelector<HTMLElement>(step.section);
+        const anchor=document.querySelector<HTMLElement>(step.anchor);
+        return section&&anchor?{...step,top:section.getBoundingClientRect().top,point:anchorFor(anchor,step.side,step.scale)}:null;
+      });
+      if(resolved.some(item=>!item))return;
+      const items=resolved as {state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number;top:number;point:{x:number;y:number;scale:number}}[];
+      const start=innerHeight*.82,settle=innerHeight*.55;
+      let from=items[0].state,to=items[0].state,t=0,a=items[0].point,b=items[0].point;
+      for(let index=1;index<items.length;index++){
+        const item=items[index],previous=items[index-1];
+        if(item.top<=settle){
+          from=item.state;to=item.state;t=0;a=item.point;b=item.point;
+          continue;
+        }
+        if(item.top<start){
+          from=previous.state;to=item.state;t=smoothstep((start-item.top)/(start-settle));a=previous.point;b=item.point;
+        }
+        break;
       }
-
-      const x=lerp(a.x,b.x,t),y=lerp(a.y,b.y,t),scale=lerp(a.scale,b.scale,t);
+      const lift=Math.sin(Math.PI*t)*22;
+      const x=lerp(a.x,b.x,t),y=lerp(a.y,b.y,t)-lift,scale=lerp(a.scale,b.scale,t)*(1+Math.sin(Math.PI*t)*.035);
       layer.style.setProperty("--artifact-x",`${x.toFixed(2)}px`);
       layer.style.setProperty("--artifact-y",`${y.toFixed(2)}px`);
       layer.style.setProperty("--artifact-scale",scale.toFixed(3));
-      layer.style.setProperty("--artifact-opacity",clamp(opacity,0,1).toFixed(3));
+      layer.style.setProperty("--artifact-opacity","1");
       layer.dataset.artifactPhase=from===to?`${from}:settled`:`${from}:${to}`;
-      root.dataset.artifactFrom=from;root.dataset.artifactTo=to;root.dataset.artifactMix=t.toFixed(3);root.dataset.artifactOpacity=clamp(opacity,0,1).toFixed(3);
-      const detail:ArtifactDetail={from,to,t,opacity:clamp(opacity,0,1)};
+      root.dataset.artifactFrom=from;root.dataset.artifactTo=to;root.dataset.artifactMix=t.toFixed(3);root.dataset.artifactOpacity="1.000";
+      const detail:ArtifactDetail={from,to,t,opacity:1};
       window.dispatchEvent(new CustomEvent<ArtifactDetail>("portfolio-artifact",{detail}));
     };
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(apply);};
@@ -187,5 +197,6 @@ export function SignalCanvas({hostSelector=".hero",persistent=false}:{hostSelect
     return()=>{delete root.dataset.signalFallback;};
   },[persistent,webgl]);
 
-  return <div ref={layerRef} className={`signal-layer${persistent?" persistent-artifact":""}`} aria-hidden="true" data-mode={webgl?"webgl":"poster"}>{webgl?<Scene dark={dark} persistent={persistent} onLost={()=>{setFailed(true);setScene(null)}}/>:<StaticSignalPoster/>}</div>;
+  const Poster=variant==="404"?Static404Poster:StaticSignalPoster;
+  return <div ref={layerRef} className={`signal-layer${persistent?" persistent-artifact":""}`} aria-hidden="true" data-mode={webgl?"webgl":"poster"} data-variant={variant}>{webgl?<Scene dark={dark} persistent={persistent} variant={variant} onLost={()=>{setFailed(true);setScene(null)}}/>:<Poster/>}</div>;
 }

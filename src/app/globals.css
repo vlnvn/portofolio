@@ -530,3 +530,21 @@ html[data-signal-fallback="true"] .hero-static-artifact{display:block}
   .persistent-artifact{display:none!important}
   .hero-static-artifact{display:block!important}
 }
+
+
+/* V3.8 semantic artifact silhouettes + compositor-only travel */
+.persistent-artifact{
+  width:clamp(230px,20vw,300px)!important;
+  height:clamp(185px,16vw,240px)!important;
+  contain:layout paint style;
+  will-change:transform;
+  transition:opacity .18s ease;
+}
+.error-404-poster{color:var(--blue)}
+.not-found .signal-layer[data-variant="404"]{max-width:430px}
+@media(max-width:899px) and (min-width:700px){
+  .persistent-artifact{width:225px!important;height:180px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .persistent-artifact{will-change:auto}
+}

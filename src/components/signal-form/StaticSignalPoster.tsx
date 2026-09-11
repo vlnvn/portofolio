@@ -16,3 +16,16 @@ export function StaticSignalPoster() {
     <circle className="aperture-core" cx="80" cy="60" r="13"/>
   </svg>;
 }
+
+export function Static404Poster() {
+  return <svg className="signal-poster error-404-poster" viewBox="0 0 240 120" aria-hidden="true">
+    <g fill="none" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M24 68 49 26v68M22 68h43"/>
+      <ellipse cx="120" cy="60" rx="27" ry="38"/>
+      <path d="M175 68 200 26v68M173 68h43"/>
+    </g>
+    <g fill="currentColor" stroke="none">
+      <circle cx="49" cy="26" r="4"/><circle cx="120" cy="18" r="4"/><circle cx="200" cy="26" r="4"/>
+    </g>
+  </svg>;
+}

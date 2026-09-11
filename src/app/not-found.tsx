@@ -12,6 +12,6 @@ export default function NotFound(){
       <p>The project index is still available from the homepage.</p>
       <Link href="/">Return home</Link>
     </div>
-    <SignalCanvas hostSelector=".not-found"/>
+    <SignalCanvas hostSelector=".not-found" variant="404"/>
   </main>;
 }
