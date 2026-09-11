@@ -35,4 +35,10 @@ npx playwright test tests/foundation.spec.ts --project=webkit --workers=1
 - `research/PRODUCTION_ASSET_MANIFEST.md` records real media and evidence boundaries.
 - `research/V3_1_RC_ACCEPTANCE.md` records the release-candidate gate and remaining launch inputs.
 
-Set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin before deployment. No résumé action is published until a verified PDF is supplied.
+## Deployment
+
+Copy `.env.example` to your local/deployment environment and set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin before production. That origin is used for canonical URLs, Open Graph resolution, robots and the sitemap.
+
+The site is intentionally static-first: semantic project content is server-rendered, Three.js is a progressive Hero enhancement, and there is no backend/database dependency to deploy. No résumé action is published until a verified PDF is supplied.
+
+A loading skeleton, LocalBusiness schema and `llms.txt` are intentionally omitted because the current static portfolio does not need them.
