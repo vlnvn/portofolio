@@ -77,6 +77,7 @@ test("artifact uses local pointer proximity in hero, projects and 404",async({pa
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   const artifact=page.locator(".persistent-artifact");
   await expect.poll(()=>artifact.getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await expect.poll(()=>artifact.getAttribute("data-artifact-motion"),{timeout:3000}).toBe("settled");
   let box=await artifact.boundingBox();expect(box).not.toBeNull();
   await page.mouse.move(box!.x+box!.width*.78,box!.y+box!.height*.28);
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-proximity")),{timeout:2000}).toBeGreaterThan(.35);

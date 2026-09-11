@@ -214,7 +214,11 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       startMorph();
       if(morph.t<1){
         morph.t=Math.min(1,morph.t+dt/.34);
-        if(morph.t>=1){visual.state=morph.to;if(morph.pending!==morph.to)startMorph();}
+        if(morph.t>=1){
+          visual.state=morph.to;
+          morph.from=morph.to;
+          if(morph.pending!==morph.to){morph.to=morph.pending;morph.t=0;}
+        }
       }
 
       const dx=target.x-visual.x,dy=target.y-visual.y,distance=Math.hypot(dx,dy);

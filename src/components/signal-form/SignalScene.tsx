@@ -95,7 +95,7 @@ function KineticInput({target}:{target:MotionRef}){
       const nx=(event.clientX-cx)/Math.max(rect.width*.5,1);
       const ny=(event.clientY-cy)/Math.max(rect.height*.5,1);
       const distance=Math.hypot(nx,ny);
-      const proximity=clamp01((1.65-distance)/.95);
+      const proximity=clamp01((1.85-distance)/1.05);
       target.current.x=clamp(nx)*proximity;
       target.current.y=clamp(ny)*proximity;
       target.current.proximity=proximity;
