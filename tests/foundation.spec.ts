@@ -83,7 +83,7 @@ test("kinetic interaction visibly responds to pointer",async({page},testInfo)=>{
   await page.waitForTimeout(1000);
   const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1220,430);
-  await expect.poll(()=>Number(page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0)),{timeout:2000}).toBeGreaterThan(5);
+  await expect.poll(async()=>Number(await page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0)),{timeout:2000}).toBeGreaterThan(5);
   await expect.poll(()=>Number(page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
   const ambient=await page.locator("html").evaluate(el=>({section:(el as HTMLElement).dataset.lightSection,x:getComputedStyle(el).getPropertyValue("--ambient-a-x")}));
@@ -101,7 +101,7 @@ test("project media light and shadow follow the pointer",async({page},testInfo)=
   expect(box).not.toBeNull();
   await page.mouse.move(box!.x+box!.width*.82,box!.y+box!.height*.28);
   await expect.poll(()=>media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-light-x"))||0)).toBeGreaterThan(5);
-  await expect.poll(()=>Math.abs(Number(media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||0))),{timeout:2000}).toBeGreaterThan(2);
+  await expect.poll(async()=>Math.abs(Number(await media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||0))),{timeout:2000}).toBeGreaterThan(2);
 });
 
 test("continuous ambient field removes per-section color seams",async({page},testInfo)=>{
