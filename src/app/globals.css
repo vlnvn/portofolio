@@ -409,7 +409,7 @@ html[data-theme="dark"] .media-sheen{mix-blend-mode:screen;opacity:.06}
 @media(any-hover:hover) and (any-pointer:fine) and (prefers-reduced-motion:no-preference){
   .project-chapter .project-media .media-primary{
     transform:
-      translate3d(var(--media-primary-shift-x),calc(var(--media-primary-shift-y) + var(--evidence-y)),var(--evidence-z))
+      translate3d(var(--media-primary-shift-x),var(--media-primary-shift-y),var(--evidence-z))
       rotateX(calc(var(--media-rotate-x) + var(--evidence-rx)))
       rotateY(calc(var(--media-rotate-y) + var(--evidence-ry)))
       scale(var(--evidence-scale));
@@ -432,8 +432,8 @@ html[data-theme="dark"] .media-secondary{box-shadow:var(--media-secondary-shadow
   .project-chapter{min-height:clamp(840px,94svh,900px)}
 }
 @media(max-width:699px){
-  .project-chapter .chapter-copy{transform:translate3d(calc(var(--chapter-copy-x)*.45),calc(var(--chapter-copy-y)*.45),0);opacity:max(.88,var(--chapter-copy-opacity))}
-  .project-media{transform:translate3d(calc(var(--chapter-media-x)*.42),calc(var(--chapter-media-y)*.42),0);opacity:max(.86,var(--chapter-media-opacity))}
+  .project-chapter .chapter-copy{transform:translate3d(var(--chapter-copy-x),var(--chapter-copy-y),0);opacity:var(--chapter-copy-opacity)}
+  .project-media{transform:translate3d(var(--chapter-media-x),var(--chapter-media-y),0);opacity:var(--chapter-media-opacity)}
   .project-chapter .media-primary{
     transform:translate3d(0,0,0) rotateY(var(--evidence-ry)) scale(var(--evidence-scale));
   }
