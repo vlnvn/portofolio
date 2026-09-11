@@ -126,9 +126,11 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
 
       if(host){
         const bounds=host.getBoundingClientRect();
-        const inside=pointerAllowed&&pointer.clientX>=bounds.left&&pointer.clientX<=bounds.right&&pointer.clientY>=bounds.top&&pointer.clientY<=bounds.bottom;
-        const hx=inside?clamp((pointer.clientX-bounds.left)/bounds.width*2-1):0;
-        const hy=inside?clamp((pointer.clientY-bounds.top)/bounds.height*2-1):0;
+        const visible=bounds.bottom>0&&bounds.top<innerHeight;
+        const responsive=pointerAllowed&&visible;
+        const hx=responsive?clamp((pointer.clientX-bounds.left)/Math.max(bounds.width,1)*2-1):0;
+        const hy=responsive?clamp((pointer.clientY-bounds.top)/Math.max(bounds.height,1)*2-1):0;
+        document.documentElement.dataset.kineticHost=visible?"visible":"hidden";
         const changed=Math.abs(lastHost.current.x-hx)>.0005||Math.abs(lastHost.current.y-hy)>.0005;
         if(changed){
           lastHost.current={x:hx,y:hy};
