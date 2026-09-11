@@ -71,7 +71,7 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     const desktopMotion=matchMedia("(min-width: 700px)");
     const sections=Array.from(document.querySelectorAll<HTMLElement>(".hero,.project-chapter,.contact,.not-found"));
     const host=document.querySelector<HTMLElement>(hostSelector);
-    const pointer={x:0,y:0,clientX:innerWidth/2,clientY:innerHeight/2,active:false,type:"" as string};
+    const pointer={x:0,y:0,clientX:innerWidth/2,clientY:innerHeight/2,active:false};
     let frame=0;
 
     const setValue=(element:HTMLElement,name:string,value:number,unit="px")=>element.style.setProperty(name,`${value.toFixed(2)}${unit}`);
@@ -97,7 +97,7 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     const update=()=>{
       frame=0;
       const motionAllowed=!reduced.matches&&desktopMotion.matches;
-      const pointerAllowed=motionAllowed&&pointer.active&&pointer.type==="mouse";
+      const pointerAllowed=motionAllowed&&pointer.active;
       const px=pointerAllowed?pointer.x:0;
       const py=pointerAllowed?pointer.y:0;
       const candidates=sections.map(section=>{
@@ -149,15 +149,17 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     };
 
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
-    const onPointer=(event:PointerEvent)=>{
+    const onMouse=(event:MouseEvent)=>{
       pointer.clientX=event.clientX;pointer.clientY=event.clientY;
       pointer.x=clamp(event.clientX/innerWidth*2-1);pointer.y=clamp(event.clientY/innerHeight*2-1);
-      pointer.type=event.pointerType;pointer.active=true;schedule();
+      pointer.active=true;
+      document.documentElement.dataset.kineticInput="mouse";
+      schedule();
     };
-    const reset=()=>{pointer.active=false;pointer.type="";pointer.x=0;pointer.y=0;schedule();};
+    const reset=()=>{pointer.active=false;pointer.x=0;pointer.y=0;schedule();};
 
     update();
-    window.addEventListener("pointermove",onPointer,{passive:true});
+    window.addEventListener("mousemove",onMouse,{passive:true});
     window.addEventListener("scroll",schedule,{passive:true});
     window.addEventListener("resize",schedule,{passive:true});
     window.addEventListener("blur",reset);
@@ -166,7 +168,7 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     desktopMotion.addEventListener("change",schedule);
     return()=>{
       cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove",onPointer);
+      window.removeEventListener("mousemove",onMouse);
       window.removeEventListener("scroll",schedule);
       window.removeEventListener("resize",schedule);
       window.removeEventListener("blur",reset);
