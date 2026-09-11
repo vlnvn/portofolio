@@ -81,7 +81,7 @@ function KineticInput({target}:{target:MotionRef}){
   return null;
 }
 
-function ArtifactInput({target,persistent}:{target:ArtifactRef;persistent:boolean}){
+function ArtifactInput({onTarget,persistent}:{onTarget:(detail:ArtifactTarget)=>void;persistent:boolean}){
   const {invalidate}=useThree();
   useEffect(()=>{
     if(!persistent)return;
@@ -89,13 +89,13 @@ function ArtifactInput({target,persistent}:{target:ArtifactRef;persistent:boolea
     const read=()=>{
       const from=(root.dataset.artifactFrom as ArtifactState|undefined)||"hero";
       const to=(root.dataset.artifactTo as ArtifactState|undefined)||from;
-      target.current.from=from;target.current.to=to;target.current.t=clamp01(Number(root.dataset.artifactMix)||0);target.current.opacity=clamp01(Number(root.dataset.artifactOpacity)||1);
+      onTarget({from,to,t:clamp01(Number(root.dataset.artifactMix)||0),opacity:clamp01(Number(root.dataset.artifactOpacity)||1)});
       invalidate();
     };
-    const onArtifact=(event:Event)=>{const detail=(event as CustomEvent<ArtifactTarget>).detail;target.current.from=detail.from;target.current.to=detail.to;target.current.t=detail.t;target.current.opacity=detail.opacity;invalidate();};
+    const onArtifact=(event:Event)=>{onTarget((event as CustomEvent<ArtifactTarget>).detail);invalidate();};
     read();window.addEventListener("portfolio-artifact",onArtifact);
     return()=>window.removeEventListener("portfolio-artifact",onArtifact);
-  },[invalidate,persistent,target]);
+  },[invalidate,onTarget,persistent]);
   return null;
 }
 
@@ -191,7 +191,8 @@ function ArtifactRig({target,artifact,dark,persistent}:{target:MotionRef;artifac
 
 function Scene({dark,persistent}:{dark:boolean;persistent:boolean}){
   const target=useRef({x:0,y:0}),artifact=useRef<ArtifactTarget>({from:"hero",to:"hero",t:0,opacity:1});
-  return <><KineticInput target={target}/><ArtifactInput target={artifact} persistent={persistent}/><ResponsiveLights target={target} dark={dark}/><ArtifactRig target={target} artifact={artifact} dark={dark} persistent={persistent}/></>;
+  const setArtifact=(detail:ArtifactTarget)=>{artifact.current=detail;};
+  return <><KineticInput target={target}/><ArtifactInput onTarget={setArtifact} persistent={persistent}/><ResponsiveLights target={target} dark={dark}/><ArtifactRig target={target} artifact={artifact} dark={dark} persistent={persistent}/></>;
 }
 
 export default function SignalScene({dark,persistent=false,onLost}:{dark:boolean;persistent?:boolean;onLost:()=>void}){
