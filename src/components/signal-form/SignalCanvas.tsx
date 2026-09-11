@@ -141,7 +141,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       const width=layer?.offsetWidth||280,height=layer?.offsetHeight||225;
       const minX=width*.52+14,maxX=innerWidth-width*.52-14;
       const minY=112+height*.5,maxY=innerHeight-height*.52-14;
-      if(side==="hero")return {x:clamp(rect.left+width*.24,minX,maxX),y:clamp(rect.bottom-height*.22,minY,maxY),scale};
+      if(side==="hero")return {x:clamp(rect.right-width*.1,minX,maxX),y:clamp(rect.bottom-height*.12,minY,maxY),scale};
       if(side==="contact")return {x:clamp(innerWidth-width*.68,minX,maxX),y:clamp(innerHeight-height*.68,minY,maxY),scale};
       const overlap=width*.16;
       const x=side==="left"?rect.left+overlap:rect.right-overlap;

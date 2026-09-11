@@ -4,91 +4,67 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
-type MotionRef={current:{x:number;y:number}};
-type Vec3=[number,number,number];
+type MotionRef={current:{x:number;y:number;proximity:number}};
 type ArtifactState="hero"|"kairos"|"kalintang"|"sambut"|"colors"|"aether"|"nara";
 type ArtifactTarget={from:ArtifactState;to:ArtifactState;t:number;opacity:number};
 type ArtifactRef={current:ArtifactTarget};
-type Part={position:Vec3;rotation:Vec3;scale:Vec3};
-type Shape={rigRotation:Vec3;rigScale:number;spin:number;idle:number;interaction:number;boxes:Part[];cylinders:Part[];spheres:Part[];tori:Part[]};
 
-const clamp=(value:number)=>Math.max(-1,Math.min(1,value));
-const clamp01=(value:number)=>Math.max(0,Math.min(1,value));
+const clamp=(value:number,min=-1,max=1)=>Math.max(min,Math.min(max,value));
+const clamp01=(value:number)=>clamp(value,0,1);
 const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
-const H:Part={position:[0,0,0],rotation:[0,0,0],scale:[.001,.001,.001]};
-const P=(position:Vec3,rotation:Vec3,scale:Vec3):Part=>({position,rotation,scale});
+const ease=(t:number)=>{const x=clamp01(t);return x*x*(3-2*x);};
 
-const shapes:Record<ArtifactState,Shape>={
-  hero:{
-    rigRotation:[-.08,.12,0],rigScale:1,spin:1,idle:1,interaction:1,
-    boxes:[
-      P([-.82,.42,.18],[-.16,.34,-.52],[.86,.28,.12]),
-      P([.08,-.86,.06],[.44,-.24,.7],[.98,.3,.12]),
-      P([.88,.34,-.16],[-.2,.56,.36],[.84,.26,.11]),
-    ],
-    cylinders:[P([-.18,.08,-.28],[.4,.12,-.34],[.07,.82,.07]),P([.48,-.18,.34],[-.28,.46,.58],[.06,.68,.06])],
-    spheres:[P([-1.35,-.42,.18],[0,0,0],[.1,.1,.1]),P([.08,.82,-.16],[0,0,0],[.12,.12,.12]),P([1.28,.36,.12],[0,0,0],[.09,.09,.09])],
-    tori:[P([0,0,.02],[1.05,.26,.1],[1.15,.78,1.15]),P([.04,-.02,.26],[.62,-.48,-.28],[.82,1.02,.82]),P([-.06,.06,-.28],[1.38,.56,.7],[1.38,.86,1.38])],
-  },
-  kairos:{
-    rigRotation:[.12,-.34,.06],rigScale:.93,spin:.08,idle:.28,interaction:.24,
-    boxes:[P([0,0,0],[0,0,0],[1.12,.78,.64]),P([0,0,.35],[0,0,0],[.18,.79,.055]),P([0,0,.36],[0,0,0],[1.13,.16,.055])],
-    cylinders:[H,H],
-    spheres:[P([-.86,-.57,.36],[0,0,0],[.07,.07,.07]),P([.86,-.57,.36],[0,0,0],[.07,.07,.07]),P([.86,.57,.36],[0,0,0],[.07,.07,.07])],
-    tori:[H,H,H],
-  },
-  kalintang:{
-    rigRotation:[.04,-.24,-.12],rigScale:.95,spin:.04,idle:.34,interaction:.22,
-    boxes:[H,H,H],
-    cylinders:[P([-.5,-.52,.02],[0,0,.62],[.17,.82,.17]),P([-.3,-.26,.02],[0,0,.62],[.28,.34,.25])],
-    spheres:[P([.24,.33,0],[0,0,0],[.72,.94,.64]),P([-.12,.56,.08],[0,0,0],[.56,.72,.58]),P([-.82,-.9,.02],[0,0,0],[.22,.18,.22])],
-    tori:[H,H,H],
-  },
-  sambut:{
-    rigRotation:[.03,-.22,.02],rigScale:.92,spin:.04,idle:.3,interaction:.2,
-    boxes:[P([0,0,0],[0,0,0],[1.15,.78,.08]),P([-.42,.14,.07],[0,0,0],[.12,.38,.085]),P([-.42,.14,.075],[0,0,0],[.38,.12,.085])],
-    cylinders:[P([.5,-.18,.12],[0,0,0],[.08,.28,.08]),H],
-    spheres:[P([.42,.2,.08],[0,0,0],[.18,.18,.1]),P([.42,-.17,.08],[0,0,0],[.07,.07,.05]),P([.66,-.17,.08],[0,0,0],[.07,.07,.05])],
-    tori:[H,H,H],
-  },
-  colors:{
-    rigRotation:[.03,-.18,-.02],rigScale:.9,spin:.05,idle:.32,interaction:.2,
-    boxes:[P([0,0,0],[0,0,0],[1.05,.68,.42]),P([-.28,.47,.02],[0,0,0],[.4,.18,.22]),P([.44,.43,.03],[0,0,0],[.18,.1,.12])],
-    cylinders:[P([.18,-.03,.38],[Math.PI/2,0,0],[.43,.33,.43]),H],
-    spheres:[P([-.62,.12,.46],[0,0,0],[.07,.07,.07]),H,H],
-    tori:[P([.18,-.03,.58],[0,0,0],[.45,.45,.45]),H,H],
-  },
-  aether:{
-    rigRotation:[.22,-.38,.08],rigScale:.93,spin:.42,idle:.4,interaction:.28,
-    boxes:[P([0,0,0],[.12,.18,.08],[.88,.88,.88]),P([.72,.62,.18],[-.14,.28,.24],[.27,.27,.27]),H],
-    cylinders:[H,H],
-    spheres:[P([-.76,-.7,.52],[0,0,0],[.08,.08,.08]),P([.78,-.68,.48],[0,0,0],[.08,.08,.08]),P([.7,.72,-.42],[0,0,0],[.08,.08,.08])],
-    tori:[P([0,0,0],[1.08,.18,.22],[1.22,.82,1.22]),P([0,0,0],[.42,.88,-.62],[1.02,.72,1.02]),H],
-  },
-  nara:{
-    rigRotation:[.2,-.12,-.02],rigScale:.9,spin:.04,idle:.28,interaction:.18,
-    boxes:[P([-.8,-.08,.1],[0,0,.04],[.08,.72,.07]),P([-.8,.58,.1],[0,0,.04],[.28,.16,.07]),H],
-    cylinders:[P([.08,0,0],[Math.PI/2,0,0],[.84,.11,.84]),P([.08,0,.13],[Math.PI/2,0,0],[.52,.07,.52])],
-    spheres:[P([-.12,.04,.28],[0,0,0],[.11,.11,.08]),P([.18,.18,.28],[0,0,0],[.09,.09,.07]),P([.36,-.12,.28],[0,0,0],[.08,.08,.06])],
-    tori:[P([.08,0,.22],[0,0,0],[.86,.68,.86]),H,H],
-  },
-};
+function roundedRectShape(width:number,height:number,radius:number){
+  const x=-width/2,y=-height/2,r=Math.min(radius,width/2,height/2);
+  const shape=new THREE.Shape();
+  shape.moveTo(x+r,y);
+  shape.lineTo(x+width-r,y);shape.quadraticCurveTo(x+width,y,x+width,y+r);
+  shape.lineTo(x+width,y+height-r);shape.quadraticCurveTo(x+width,y+height,x+width-r,y+height);
+  shape.lineTo(x+r,y+height);shape.quadraticCurveTo(x,y+height,x,y+height-r);
+  shape.lineTo(x,y+r);shape.quadraticCurveTo(x,y,x+r,y);
+  return shape;
+}
+
+function extrude(shape:THREE.Shape,depth:number,bevel=.045){
+  const geometry=new THREE.ExtrudeGeometry(shape,{depth,steps:1,curveSegments:18,bevelEnabled:true,bevelSegments:2,bevelSize:bevel,bevelThickness:bevel});
+  geometry.center();
+  return geometry;
+}
+
+function drumstickMeatGeometry(){
+  const shape=new THREE.Shape();
+  shape.moveTo(-.2,-.62);
+  shape.bezierCurveTo(-.42,-.48,-.72,-.24,-.78,.18);
+  shape.bezierCurveTo(-.87,.72,-.48,1.04,.03,1.08);
+  shape.bezierCurveTo(.54,1.12,.83,.76,.77,.3);
+  shape.bezierCurveTo(.72,-.08,.46,-.38,.2,-.56);
+  shape.bezierCurveTo(.08,-.64,-.08,-.67,-.2,-.62);
+  return extrude(shape,.34,.06);
+}
 
 function KineticInput({target}:{target:MotionRef}){
-  const {invalidate}=useThree();
+  const {gl,invalidate}=useThree();
   useEffect(()=>{
     const reduced=matchMedia("(prefers-reduced-motion: reduce)");
     const move=(event:MouseEvent)=>{
       if(reduced.matches)return;
-      target.current.x=clamp(event.clientX/Math.max(innerWidth,1)*2-1);
-      target.current.y=clamp(event.clientY/Math.max(innerHeight,1)*2-1);
+      const rect=gl.domElement.getBoundingClientRect();
+      const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+      const nx=(event.clientX-cx)/Math.max(rect.width*.5,1);
+      const ny=(event.clientY-cy)/Math.max(rect.height*.5,1);
+      const distance=Math.hypot(nx,ny);
+      const proximity=clamp01((1.65-distance)/.95);
+      target.current.x=clamp(nx)*proximity;
+      target.current.y=clamp(ny)*proximity;
+      target.current.proximity=proximity;
       document.documentElement.dataset.signalTarget=`${target.current.x.toFixed(3)},${target.current.y.toFixed(3)}`;
+      document.documentElement.dataset.signalProximity=proximity.toFixed(3);
       invalidate();
     };
-    const reset=()=>{target.current.x=0;target.current.y=0;document.documentElement.dataset.signalTarget="0.000,0.000";invalidate();};
+    const reset=()=>{target.current.x=0;target.current.y=0;target.current.proximity=0;document.documentElement.dataset.signalTarget="0.000,0.000";document.documentElement.dataset.signalProximity="0.000";invalidate();};
     window.addEventListener("mousemove",move,{passive:true});window.addEventListener("blur",reset);document.documentElement.addEventListener("mouseleave",reset);
     return()=>{window.removeEventListener("mousemove",move);window.removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);};
-  },[invalidate,target]);
+  },[gl,invalidate,target]);
   return null;
 }
 
@@ -110,18 +86,36 @@ function ArtifactInput({onTarget,persistent}:{onTarget:(detail:ArtifactTarget)=>
   return null;
 }
 
-function useArtifactMaterials(dark:boolean){
+function useMaterials(dark:boolean){
   const materials=useMemo(()=>({
-    energy:new THREE.MeshStandardMaterial({roughness:.23,metalness:.28}),
-    ice:new THREE.MeshStandardMaterial({roughness:.3,metalness:.16}),
-    deep:new THREE.MeshStandardMaterial({roughness:.2,metalness:.34}),
-  }),[]);
+    energy:new THREE.MeshStandardMaterial({color:"#4C8DE8",roughness:.2,metalness:.3}),
+    ice:new THREE.MeshStandardMaterial({color:"#B9D7FF",roughness:.26,metalness:.16}),
+    deep:new THREE.MeshStandardMaterial({color:"#0E2E59",roughness:.22,metalness:.34}),
+    kraft:new THREE.MeshStandardMaterial({color:"#B78955",roughness:.62,metalness:.02}),
+    tape:new THREE.MeshStandardMaterial({color:"#E8D6B6",roughness:.48,metalness:0}),
+    label:new THREE.MeshStandardMaterial({color:"#F5F8FC",roughness:.5,metalness:0}),
+    meat:new THREE.MeshStandardMaterial({color:"#C85E2F",roughness:.46,metalness:0}),
+    meatLight:new THREE.MeshStandardMaterial({color:"#E48242",roughness:.42,metalness:0}),
+    bone:new THREE.MeshStandardMaterial({color:"#F1E3C8",roughness:.5,metalness:0}),
+    med:new THREE.MeshStandardMaterial({color:"#ECF4FF",roughness:.38,metalness:.04}),
+    teal:new THREE.MeshStandardMaterial({color:"#167D73",roughness:.34,metalness:.08}),
+    camera:new THREE.MeshStandardMaterial({color:"#17355F",roughness:.3,metalness:.22}),
+    glass:new THREE.MeshStandardMaterial({color:"#071A33",roughness:.08,metalness:.5}),
+    silver:new THREE.MeshStandardMaterial({color:"#A8C4E6",roughness:.24,metalness:.42}),
+    plate:new THREE.MeshStandardMaterial({color:"#F4F7FB",roughness:.34,metalness:.03}),
+    green:new THREE.MeshStandardMaterial({color:"#55976E",roughness:.45,metalness:0}),
+    food:new THREE.MeshStandardMaterial({color:"#D49A42",roughness:.48,metalness:0}),
+    xAxis:new THREE.MeshStandardMaterial({color:"#E36B68",roughness:.3,metalness:.16}),
+    yAxis:new THREE.MeshStandardMaterial({color:"#66A57A",roughness:.3,metalness:.16}),
+    zAxis:new THREE.MeshStandardMaterial({color:"#5792E2",roughness:.3,metalness:.16}),
+    edge:new THREE.LineBasicMaterial({color:dark?"#A9C9F5":"#173E6D",transparent:true,opacity:.78}),
+  }),[dark]);
   useEffect(()=>{
-    materials.energy.color.set(dark?"#70A4FF":"#2F74E8");
-    materials.ice.color.set(dark?"#1D3558":"#B9D0F2");
-    materials.deep.color.set(dark?"#B9D4FF":"#173E78");
+    materials.energy.color.set(dark?"#74A9F5":"#3E82DC");
+    materials.ice.color.set(dark?"#C8DEFF":"#B5D0F4");
+    materials.deep.color.set(dark?"#0A2141":"#123C6D");
   },[dark,materials]);
-  useEffect(()=>()=>{materials.energy.dispose();materials.ice.dispose();materials.deep.dispose();},[materials]);
+  useEffect(()=>()=>{Object.values(materials).forEach(material=>material.dispose());},[materials]);
   return materials;
 }
 
@@ -130,105 +124,208 @@ function ResponsiveLights({target,dark}:{target:MotionRef;dark:boolean}){
   const current=useRef({x:0,y:0});
   const {invalidate}=useThree();
   useFrame((_,delta)=>{
-    const dx=target.current.x-current.current.x,dy=target.current.y-current.current.y,alpha=1-Math.exp(-10.5*delta);
+    const dx=target.current.x-current.current.x,dy=target.current.y-current.current.y,alpha=1-Math.exp(-12*delta);
     current.current.x+=dx*alpha;current.current.y+=dy*alpha;
     const x=current.current.x,y=current.current.y;
-    if(key.current)key.current.position.set(-2.8+x*3.6,3.6-y*2.4,4.9+x*.72);
-    if(fill.current)fill.current.position.set(3.4-x*2.5,-1.6+y*1.9,2.55-y*.6);
-    if(rim.current)rim.current.position.set(-3.6-x*1.35,-2.3-y*.9,1.9);
-    if(point.current){point.current.position.set(x*3.15,-y*2.4,2.75+Math.abs(x)*.6);point.current.intensity=(dark?4.8:4.0)+(Math.abs(x)+Math.abs(y))*.9;}
-    if(Math.abs(dx)>.00045||Math.abs(dy)>.00045)invalidate();
+    if(key.current)key.current.position.set(-2.8+x*3.8,3.6-y*2.7,4.9+x*.8);
+    if(fill.current)fill.current.position.set(3.4-x*2.8,-1.6+y*2.1,2.55-y*.7);
+    if(rim.current)rim.current.position.set(-3.6-x*1.4,-2.3-y,1.9);
+    if(point.current){point.current.position.set(x*3.4,-y*2.7,2.75+Math.abs(x)*.7);point.current.intensity=(dark?4.7:3.9)+(Math.abs(x)+Math.abs(y))*1.2;}
+    if(Math.abs(dx)>.0004||Math.abs(dy)>.0004)invalidate();
   });
-  return <><ambientLight intensity={dark?.5:.68}/><directionalLight ref={key} position={[-2.8,3.6,4.9]} intensity={dark?2.8:3.05}/><directionalLight ref={fill} position={[3.4,-1.6,2.55]} intensity={dark?.8:1.0}/><directionalLight ref={rim} position={[-3.6,-2.3,1.9]} intensity={dark?.95:.7}/><pointLight ref={point} color={dark?"#8CB6FF":"#1757AF"} position={[0,0,2.75]} intensity={dark?4.8:4.0} distance={8} decay={2}/></>;
+  return <><ambientLight intensity={dark?.48:.68}/><directionalLight ref={key} position={[-2.8,3.6,4.9]} intensity={dark?2.9:3.15}/><directionalLight ref={fill} position={[3.4,-1.6,2.55]} intensity={dark?.85:1.05}/><directionalLight ref={rim} position={[-3.6,-2.3,1.9]} intensity={dark?1:.72}/><pointLight ref={point} color={dark?"#8CB6FF":"#1757AF"} position={[0,0,2.75]} intensity={dark?4.7:3.9} distance={8} decay={2}/></>;
 }
 
+type ObjectRefs=Record<ArtifactState,THREE.Group|null>;
+
 function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactRef;dark:boolean}){
-  const rig=useRef<THREE.Group>(null);
-  const boxRefs=useRef<(THREE.Mesh|null)[]>([]),cylinderRefs=useRef<(THREE.Mesh|null)[]>([]),sphereRefs=useRef<(THREE.Mesh|null)[]>([]),torusRefs=useRef<(THREE.Mesh|null)[]>([]);
+  const rig=useRef<THREE.Group>(null),core=useRef<THREE.Group>(null),objects=useRef<ObjectRefs>({hero:null,kairos:null,kalintang:null,sambut:null,colors:null,aether:null,nara:null});
   const current=useRef({x:0,y:0});
   const {invalidate,gl}=useThree();
-  const materials=useArtifactMaterials(dark);
-  const geometries=useMemo(()=>({
-    box:new THREE.BoxGeometry(1,1,1),
-    cylinder:new THREE.CylinderGeometry(.5,.5,1,24,1,false),
-    sphere:new THREE.SphereGeometry(1,28,18),
-    torus0:new THREE.TorusGeometry(1,.045,14,80,Math.PI*2),
-    torus1:new THREE.TorusGeometry(1,.05,14,80,Math.PI*2),
-    torus2:new THREE.TorusGeometry(1,.035,14,80,Math.PI*1.68),
-  }),[]);
-  useEffect(()=>()=>{Object.values(geometries).forEach(geometry=>geometry.dispose());},[geometries]);
+  const m=useMaterials(dark);
+
+  const g=useMemo(()=>{
+    const box=new THREE.BoxGeometry(1,1,1);
+    const cylinder=new THREE.CylinderGeometry(.5,.5,1,36,1,false);
+    const sphere=new THREE.SphereGeometry(1,32,20);
+    const torus=new THREE.TorusGeometry(1,.055,16,96);
+    const thinTorus=new THREE.TorusGeometry(1,.035,14,96);
+    const card=extrude(roundedRectShape(2.2,1.35,.18),.16,.045);
+    const cameraBody=extrude(roundedRectShape(2.2,1.28,.16),.38,.055);
+    const smallRounded=extrude(roundedRectShape(1,.55,.14),.18,.035);
+    const drumstick=drumstickMeatGeometry();
+    const edges=new THREE.EdgesGeometry(box,25);
+    const plate=new THREE.CylinderGeometry(1,1,.12,64,1,false);
+    const cone=new THREE.ConeGeometry(.11,.28,24);
+    return {box,cylinder,sphere,torus,thinTorus,card,cameraBody,smallRounded,drumstick,edges,plate,cone};
+  },[]);
+  useEffect(()=>()=>{Object.values(g).forEach(geometry=>geometry.dispose());},[g]);
+
   useEffect(()=>{
     const timer=window.setInterval(()=>{if(!document.hidden&&artifact.current.opacity>.03)invalidate();},33);
     return()=>window.clearInterval(timer);
   },[artifact,invalidate]);
 
   useFrame(({clock},delta)=>{
-    const mix=clamp01(artifact.current.t),from=shapes[artifact.current.from],to=shapes[artifact.current.to];
-    const idle=lerp(from.idle,to.idle,mix),interaction=lerp(from.interaction,to.interaction,mix),spin=lerp(from.spin,to.spin,mix);
-    const desiredX=(-target.current.y*.27*interaction)+(Math.sin(clock.elapsedTime*.62)*.045+Math.sin(clock.elapsedTime*.27+.8)*.02)*idle;
-    const desiredY=(target.current.x*.36*interaction)+(Math.cos(clock.elapsedTime*.54)*.055+Math.sin(clock.elapsedTime*.31)*.018)*idle;
-    const dx=desiredX-current.current.x,dy=desiredY-current.current.y,alpha=1-Math.exp(-10.5*delta);
+    const from=artifact.current.from,to=artifact.current.to,t=clamp01(artifact.current.t);
+    const settled=from===to;
+    for(const state of Object.keys(objects.current) as ArtifactState[]){
+      const group=objects.current[state];
+      if(!group)continue;
+      group.visible=settled?state===from:(state===from&&t<.52)||(state===to&&t>.48);
+      if(settled&&state===from){group.scale.setScalar(1);group.rotation.z=0;}
+      else if(state===from&&t<.52){const p=ease(t/.52);group.scale.setScalar(lerp(1,.035,p));group.rotation.z=p*.42;}
+      else if(state===to&&t>.48){const p=ease((t-.48)/.52);group.scale.setScalar(lerp(.035,1,p));group.rotation.z=(1-p)*-.42;}
+    }
+
+    if(core.current){
+      core.current.visible=!settled;
+      const pulse=Math.sin(Math.PI*t);
+      core.current.scale.setScalar(.12+pulse*.68);
+      core.current.rotation.x=clock.elapsedTime*.26;
+      core.current.rotation.y=clock.elapsedTime*-.32;
+      core.current.rotation.z=clock.elapsedTime*.22;
+    }
+
+    const interaction:Record<ArtifactState,number>={hero:1,kairos:.76,kalintang:.82,sambut:.72,colors:.78,aether:.92,nara:.74};
+    const strength=settled?interaction[from]:lerp(interaction[from],interaction[to],t);
+    const idle=settled?(from==="hero"?.85:.28):.18;
+    const desiredX=target.current.x*.24*strength+Math.sin(clock.elapsedTime*.55)*.022*idle;
+    const desiredY=-target.current.y*.2*strength+Math.cos(clock.elapsedTime*.48)*.018*idle;
+    const dx=desiredX-current.current.x,dy=desiredY-current.current.y,alpha=1-Math.exp(-11.5*delta);
     current.current.x+=dx*alpha;current.current.y+=dy*alpha;
-    const tx=current.current.x,ty=current.current.y;
-
-    const apply=(mesh:THREE.Mesh|null,a:Part,b:Part,index:number,orbit=0)=>{
-      if(!mesh)return;
-      const sx=lerp(a.scale[0],b.scale[0],mix),sy=lerp(a.scale[1],b.scale[1],mix),sz=lerp(a.scale[2],b.scale[2],mix);
-      mesh.visible=Math.max(Math.abs(sx),Math.abs(sy),Math.abs(sz))>.012;
-      mesh.position.set(lerp(a.position[0],b.position[0],mix)+ty*(.08+index*.018)*interaction,lerp(a.position[1],b.position[1],mix)-tx*(.07+index*.016)*interaction,lerp(a.position[2],b.position[2],mix)+ty*.05*interaction);
-      mesh.rotation.set(lerp(a.rotation[0],b.rotation[0],mix)-tx*.14*interaction,lerp(a.rotation[1],b.rotation[1],mix)+ty*.18*interaction,lerp(a.rotation[2],b.rotation[2],mix)+orbit);
-      mesh.scale.set(sx,sy,sz);
-    };
-
-    boxRefs.current.forEach((mesh,index)=>apply(mesh,from.boxes[index],to.boxes[index],index));
-    cylinderRefs.current.forEach((mesh,index)=>apply(mesh,from.cylinders[index],to.cylinders[index],index));
-    sphereRefs.current.forEach((mesh,index)=>apply(mesh,from.spheres[index],to.spheres[index],index));
-    torusRefs.current.forEach((mesh,index)=>apply(mesh,from.tori[index],to.tori[index],index,clock.elapsedTime*([.30,-.23,.17][index]??.16)*spin));
 
     if(rig.current){
-      rig.current.rotation.set(lerp(from.rigRotation[0],to.rigRotation[0],mix)+tx,lerp(from.rigRotation[1],to.rigRotation[1],mix)+ty,lerp(from.rigRotation[2],to.rigRotation[2],mix)+Math.sin(clock.elapsedTime*.32)*.018*idle);
-      rig.current.scale.setScalar(lerp(from.rigScale,to.rigScale,mix));
+      const proximity=target.current.proximity;
+      rig.current.rotation.x=current.current.y+Math.sin(clock.elapsedTime*.42)*.012*idle;
+      rig.current.rotation.y=current.current.x+Math.sin(clock.elapsedTime*.36+.8)*.014*idle;
+      rig.current.rotation.z=Math.sin(clock.elapsedTime*.31)*.01*idle+target.current.x*.035*proximity;
+      rig.current.position.set(target.current.x*.1*strength,-target.current.y*.075*strength,Math.abs(target.current.x)*.05*strength);
+    }
+
+    const hero=objects.current.hero;
+    if(hero){
+      const rings=hero.children.filter(child=>child.userData.ring) as THREE.Mesh[];
+      rings.forEach((ring,index)=>{ring.rotation.z=clock.elapsedTime*([.31,-.24,.18][index]??.2);});
     }
 
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
     document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
-    document.documentElement.dataset.signalTilt=`${tx.toFixed(3)},${ty.toFixed(3)}`;
-    document.documentElement.dataset.signalState=artifact.current.from===artifact.current.to?artifact.current.from:`${artifact.current.from}-${artifact.current.to}`;
+    document.documentElement.dataset.signalTilt=`${current.current.x.toFixed(3)},${current.current.y.toFixed(3)}`;
+    document.documentElement.dataset.signalState=settled?from:`${from}-${to}`;
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
+  const refFor=(state:ArtifactState)=>(node:THREE.Group|null)=>{objects.current[state]=node;};
+
   return <group ref={rig}>
-    {[0,1,2].map(index=><mesh key={`box-${index}`} ref={element=>{boxRefs.current[index]=element}} geometry={geometries.box} material={index===0?materials.ice:materials.energy}/>)}
-    {[0,1].map(index=><mesh key={`cylinder-${index}`} ref={element=>{cylinderRefs.current[index]=element}} geometry={geometries.cylinder} material={index===0?materials.deep:materials.energy}/>)}
-    {[0,1,2].map(index=><mesh key={`sphere-${index}`} ref={element=>{sphereRefs.current[index]=element}} geometry={geometries.sphere} material={index===1?materials.ice:materials.energy}/>)}
-    {[geometries.torus0,geometries.torus1,geometries.torus2].map((geometry,index)=><mesh key={`torus-${index}`} ref={element=>{torusRefs.current[index]=element}} geometry={geometry} material={index===1?materials.ice:materials.energy}/>)}
+    <group ref={refFor("hero")} rotation={[-.08,.12,0]}>
+      <mesh userData={{ring:true}} rotation={[1.08,.28,.1]} material={m.energy} geometry={g.torus}/>
+      <mesh userData={{ring:true}} rotation={[.64,-.56,-.28]} scale={.73} material={m.ice} geometry={g.torus}/>
+      <mesh userData={{ring:true}} rotation={[1.38,.58,.72]} scale={1.18} material={m.energy} geometry={g.thinTorus}/>
+      <mesh position={[-.78,.4,.2]} rotation={[-.18,.34,-.5]} scale={[.86,.26,.12]} material={m.energy} geometry={g.box}/>
+      <mesh position={[.04,-.78,.08]} rotation={[.42,-.2,.68]} scale={[.92,.28,.12]} material={m.deep} geometry={g.box}/>
+      <mesh position={[.84,.32,-.14]} rotation={[-.18,.54,.34]} scale={[.82,.25,.11]} material={m.ice} geometry={g.box}/>
+      <mesh position={[-1.28,-.38,.18]} scale={.09} material={m.ice} geometry={g.sphere}/>
+      <mesh position={[.08,.8,-.12]} scale={.11} material={m.energy} geometry={g.sphere}/>
+      <mesh position={[1.24,.34,.1]} scale={.085} material={m.ice} geometry={g.sphere}/>
+    </group>
+
+    <group ref={refFor("kairos")} rotation={[-.3,.56,.05]}>
+      <mesh scale={[1.62,1.12,1.12]} material={m.kraft} geometry={g.box}/>
+      <lineSegments scale={[1.625,1.125,1.125]} geometry={g.edges} material={m.edge}/>
+      <mesh position={[0,0,.575]} scale={[.25,1.125,.025]} material={m.tape} geometry={g.box}/>
+      <mesh position={[0,.575,.18]} scale={[.25,.025,.78]} material={m.tape} geometry={g.box}/>
+      <mesh position={[.43,-.14,.585]} scale={[.46,.28,.025]} material={m.label} geometry={g.box}/>
+      <mesh position={[.43,-.11,.615]} scale={[.26,.028,.01]} material={m.deep} geometry={g.box}/>
+    </group>
+
+    <group ref={refFor("kalintang")} rotation={[.02,-.28,-.55]}>
+      <mesh position={[.16,.27,0]} scale={[.92,.92,.92]} material={m.meat} geometry={g.drumstick}/>
+      <mesh position={[-.55,-.76,.02]} rotation={[0,0,-.03]} scale={[.16,.78,.16]} material={m.bone} geometry={g.cylinder}/>
+      <mesh position={[-.66,-1.16,.03]} scale={[.2,.17,.16]} material={m.bone} geometry={g.sphere}/>
+      <mesh position={[-.42,-1.18,.03]} scale={[.2,.17,.16]} material={m.bone} geometry={g.sphere}/>
+      <mesh position={[.13,.45,.2]} scale={[.32,.42,.08]} material={m.meatLight} geometry={g.sphere}/>
+    </group>
+
+    <group ref={refFor("sambut")} rotation={[-.08,.18,.02]}>
+      <mesh material={m.med} geometry={g.card}/>
+      <mesh position={[0,.8,.01]} scale={[.42,.24,.8]} material={m.silver} geometry={g.smallRounded}/>
+      <mesh position={[-.66,.12,.11]} scale={[.12,.42,.08]} material={m.teal} geometry={g.box}/>
+      <mesh position={[-.66,.12,.115]} scale={[.42,.12,.08]} material={m.teal} geometry={g.box}/>
+      <mesh position={[.48,.25,.12]} scale={[.22,.22,.08]} material={m.deep} geometry={g.sphere}/>
+      <mesh position={[.48,-.15,.12]} scale={[.42,.23,.07]} material={m.deep} geometry={g.sphere}/>
+      <mesh position={[.02,-.43,.12]} scale={[.36,.045,.035]} material={m.silver} geometry={g.box}/>
+      <mesh position={[.55,-.43,.12]} scale={[.3,.045,.035]} material={m.silver} geometry={g.box}/>
+    </group>
+
+    <group ref={refFor("colors")} rotation={[-.08,.18,-.02]}>
+      <mesh material={m.camera} geometry={g.cameraBody}/>
+      <mesh position={[-.46,.76,.02]} scale={[.72,.34,.9]} material={m.camera} geometry={g.smallRounded}/>
+      <mesh position={[.83,.46,.23]} scale={[.28,.16,.08]} material={m.silver} geometry={g.box}/>
+      <mesh position={[.08,-.02,.32]} rotation={[Math.PI/2,0,0]} scale={[.82,.34,.82]} material={m.silver} geometry={g.cylinder}/>
+      <mesh position={[.08,-.02,.5]} rotation={[Math.PI/2,0,0]} scale={[.61,.24,.61]} material={m.deep} geometry={g.cylinder}/>
+      <mesh position={[.08,-.02,.64]} rotation={[Math.PI/2,0,0]} scale={[.38,.12,.38]} material={m.glass} geometry={g.cylinder}/>
+      <mesh position={[-.82,.65,.25]} rotation={[Math.PI/2,0,0]} scale={[.09,.1,.09]} material={m.energy} geometry={g.cylinder}/>
+    </group>
+
+    <group ref={refFor("aether")} rotation={[-.28,.46,.08]}>
+      <mesh scale={[1.35,1.35,1.35]} material={m.glass} geometry={g.box}/>
+      <lineSegments scale={[1.36,1.36,1.36]} geometry={g.edges} material={m.edge}/>
+      <mesh position={[.88,.72,.56]} scale={[.36,.36,.36]} material={m.ice} geometry={g.box}/>
+      <lineSegments position={[.88,.72,.56]} scale={[.365,.365,.365]} geometry={g.edges} material={m.edge}/>
+      <mesh position={[1.05,0,0]} rotation={[0,0,-Math.PI/2]} scale={[.055,1.05,.055]} material={m.xAxis} geometry={g.cylinder}/>
+      <mesh position={[2.08,0,0]} rotation={[0,0,-Math.PI/2]} material={m.xAxis} geometry={g.cone}/>
+      <mesh position={[0,1.05,0]} scale={[.055,1.05,.055]} material={m.yAxis} geometry={g.cylinder}/>
+      <mesh position={[0,2.08,0]} material={m.yAxis} geometry={g.cone}/>
+      <mesh position={[0,0,1.05]} rotation={[Math.PI/2,0,0]} scale={[.055,1.05,.055]} material={m.zAxis} geometry={g.cylinder}/>
+      <mesh position={[0,0,2.08]} rotation={[Math.PI/2,0,0]} material={m.zAxis} geometry={g.cone}/>
+    </group>
+
+    <group ref={refFor("nara")} rotation={[-.24,.18,-.03]}>
+      <mesh rotation={[Math.PI/2,0,0]} scale={[1.08,.12,1.08]} material={m.plate} geometry={g.plate}/>
+      <mesh position={[0,0,.12]} rotation={[Math.PI/2,0,0]} scale={[.72,.08,.72]} material={m.ice} geometry={g.plate}/>
+      <mesh position={[-1.22,-.08,.08]} scale={[.09,.82,.07]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.38,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.28,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.18,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-1.08,.72,.08]} scale={[.035,.24,.055]} material={m.silver} geometry={g.box}/>
+      <mesh position={[.36,.22,.26]} scale={[.22,.18,.12]} material={m.green} geometry={g.sphere}/>
+      <mesh position={[-.18,.34,.25]} scale={[.18,.16,.1]} material={m.food} geometry={g.sphere}/>
+      <mesh position={[.08,-.28,.25]} scale={[.2,.16,.11]} material={m.meatLight} geometry={g.sphere}/>
+    </group>
+
+    <group ref={core} visible={false}>
+      <mesh rotation={[1.08,.3,.1]} material={m.energy} geometry={g.torus}/>
+      <mesh rotation={[.54,-.58,-.24]} scale={.72} material={m.ice} geometry={g.torus}/>
+      <mesh rotation={[1.36,.56,.7]} scale={1.16} material={m.energy} geometry={g.thinTorus}/>
+    </group>
   </group>;
 }
 
 function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
-  const group=useRef<THREE.Group>(null),barRefs=useRef<(THREE.Mesh|null)[]>([]),ring=useRef<THREE.Mesh>(null);
+  const group=useRef<THREE.Group>(null),left=useRef<THREE.Group>(null),right=useRef<THREE.Group>(null),zero=useRef<THREE.Mesh>(null);
   const current=useRef({x:0,y:0});
   const {invalidate,gl}=useThree();
-  const materials=useArtifactMaterials(dark);
-  const box=useMemo(()=>new THREE.BoxGeometry(1,1,1),[]);
-  const torus=useMemo(()=>new THREE.TorusGeometry(1,.1,18,96),[]);
-  useEffect(()=>()=>{box.dispose();torus.dispose();},[box,torus]);
+  const m=useMaterials(dark);
+  const g=useMemo(()=>({
+    bar:extrude(roundedRectShape(1,.3,.13),.22,.045),
+    torus:new THREE.TorusGeometry(.72,.115,20,112),
+  }),[]);
+  useEffect(()=>()=>{g.bar.dispose();g.torus.dispose();},[g]);
   useEffect(()=>{const timer=window.setInterval(()=>{if(!document.hidden)invalidate();},40);return()=>window.clearInterval(timer);},[invalidate]);
-  const bars=[
-    {p:[-1.5,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
-    {p:[-1.08,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
-    {p:[-1.34,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
-    {p:[.78,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
-    {p:[1.2,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
-    {p:[.94,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
-  ];
+
   useFrame(({clock},delta)=>{
-    const dx=target.current.x*.07-current.current.x,dy=-target.current.y*.06-current.current.y,alpha=1-Math.exp(-9*delta);
+    const dx=target.current.x*.16-current.current.x,dy=-target.current.y*.12-current.current.y,alpha=1-Math.exp(-10*delta);
     current.current.x+=dx*alpha;current.current.y+=dy*alpha;
-    if(group.current)group.current.rotation.set(.04+current.current.y,-.08+current.current.x,Math.sin(clock.elapsedTime*.45)*.012);
-    barRefs.current.forEach((mesh,index)=>{if(!mesh)return;const bar=bars[index];mesh.position.set(...bar.p);mesh.rotation.set(...bar.r);mesh.scale.set(...bar.s);});
-    if(ring.current){ring.current.position.set(-.08,0,.02);ring.current.rotation.set(0,0,0);ring.current.scale.set(.43,.62,.43);}
+    if(group.current){
+      group.current.rotation.x=current.current.y*.55+Math.sin(clock.elapsedTime*.42)*.015;
+      group.current.rotation.y=current.current.x*.5+Math.sin(clock.elapsedTime*.36+.5)*.018;
+    }
+    if(left.current){left.current.position.y=Math.sin(clock.elapsedTime*.72)*.035+current.current.y*.15;left.current.rotation.z=-.025+Math.sin(clock.elapsedTime*.58)*.018-current.current.x*.08;}
+    if(right.current){right.current.position.y=Math.sin(clock.elapsedTime*.72+1.2)*.035-current.current.y*.12;right.current.rotation.z=.025+Math.sin(clock.elapsedTime*.58+1.4)*.018+current.current.x*.08;}
+    if(zero.current){zero.current.rotation.x=Math.sin(clock.elapsedTime*.48)*.04+current.current.y*.12;zero.current.rotation.y=clock.elapsedTime*.12+current.current.x*.22;zero.current.scale.set(1+target.current.proximity*.035,1-target.current.proximity*.02,1);}
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
     document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
@@ -236,18 +333,26 @@ function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
     document.documentElement.dataset.signalState="404";
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
-  return <group ref={group}>
-    {bars.map((_,index)=><mesh key={index} ref={element=>{barRefs.current[index]=element}} geometry={box} material={index%3===0?materials.ice:materials.energy}/>)}
-    <mesh ref={ring} geometry={torus} material={materials.deep}/>
+
+  const Four=({refProp}:{refProp:React.RefObject<THREE.Group|null>})=><group ref={refProp}>
+    <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
+    <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
+    <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
+  </group>;
+
+  return <group ref={group} scale={.92}>
+    <group position={[-1.3,0,0]}><Four refProp={left}/></group>
+    <mesh ref={zero} position={[0,0,.02]} material={m.silver} geometry={g.torus}/>
+    <group position={[1.3,0,0]}><Four refProp={right}/></group>
   </group>;
 }
 
 function Scene({dark,persistent,variant}:{dark:boolean;persistent:boolean;variant:"artifact"|"404"}){
-  const target=useRef({x:0,y:0}),artifact=useRef<ArtifactTarget>({from:"hero",to:"hero",t:0,opacity:1});
+  const target=useRef({x:0,y:0,proximity:0}),artifact=useRef<ArtifactTarget>({from:"hero",to:"hero",t:0,opacity:1});
   const setArtifact=(detail:ArtifactTarget)=>{artifact.current=detail;};
   return <><KineticInput target={target}/><ResponsiveLights target={target} dark={dark}/>{variant==="404"?<Error404Rig target={target} dark={dark}/>:<><ArtifactInput onTarget={setArtifact} persistent={persistent}/><ArtifactRig target={target} artifact={artifact} dark={dark}/></>}</>;
 }
 
 export default function SignalScene({dark,persistent=false,variant="artifact",onLost}:{dark:boolean;persistent?:boolean;variant?:"artifact"|"404";onLost:()=>void}){
-  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.25],fov:36}} gl={{antialias:true,alpha:true,powerPreference:"high-performance"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event:Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><Scene dark={dark} persistent={persistent} variant={variant}/></Canvas>;
+  return <Canvas className="signal-canvas" frameloop="demand" dpr={[1,1.5]} camera={{position:[0,0,5.5],fov:34}} gl={{antialias:true,alpha:true,powerPreference:"high-performance"}} onCreated={({gl,invalidate})=>{gl.domElement.addEventListener("webglcontextlost",(event:Event)=>{event.preventDefault();onLost();},{once:true});invalidate();}}><Scene dark={dark} persistent={persistent} variant={variant}/></Canvas>;
 }

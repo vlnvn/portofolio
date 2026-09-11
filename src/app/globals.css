@@ -548,3 +548,18 @@ html[data-signal-fallback="true"] .hero-static-artifact{display:block}
 @media(prefers-reduced-motion:reduce){
   .persistent-artifact{will-change:auto}
 }
+
+
+/* V3.9 semantic object scale and clear-space tuning */
+.persistent-artifact{
+  width:clamp(250px,21vw,320px)!important;
+  height:clamp(200px,17vw,255px)!important;
+  filter:drop-shadow(0 16px 28px rgba(4,16,34,.18));
+}
+.not-found .signal-layer[data-variant="404"]{
+  width:min(52vw,520px);
+  height:min(34vw,340px);
+}
+@media(max-width:899px) and (min-width:700px){
+  .persistent-artifact{width:235px!important;height:188px!important}
+}
