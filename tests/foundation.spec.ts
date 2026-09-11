@@ -135,3 +135,55 @@ test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });
+
+
+test("portrait responds only while cursor is over portrait",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","spatial portrait probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  const portrait=page.locator(".portrait"),box=await portrait.boundingBox();expect(box).not.toBeNull();
+  await page.mouse.move(box!.x+box!.width*.8,box!.y+box!.height*.3);
+  await expect.poll(()=>portrait.getAttribute("data-spatial-active"),{timeout:2000}).toBe("true");
+  await expect.poll(async()=>Math.abs(parseFloat(await portrait.evaluate(el=>(el as HTMLElement).style.getPropertyValue("--portrait-x"))||"0")),{timeout:2000}).toBeGreaterThan(2);
+  await page.mouse.move(80,120);
+  await expect.poll(()=>portrait.getAttribute("data-spatial-active"),{timeout:2000}).toBe("false");
+  await expect.poll(async()=>Math.abs(parseFloat(await portrait.evaluate(el=>(el as HTMLElement).style.getPropertyValue("--portrait-x"))||"0")),{timeout:2000}).toBeLessThan(.1);
+});
+
+test("aperture responds directly to mouse in hero and 404",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","WebGL kinetic probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.waitForTimeout(1000);const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
+  await page.mouse.move(1260,360);
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-target"),{timeout:2000}).not.toBe("0.000,0.000");
+  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
+  await page.goto("/missing-kinetic-page");await expect.poll(()=>page.locator(".not-found .signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.waitForTimeout(1000);const before404=Number(await page.locator("html").getAttribute("data-signal-frames"));
+  await page.mouse.move(1140,390);
+  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before404);
+});
+
+test("kinetic evidence sequence changes project media with scroll",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","scroll choreography probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  const chapter=page.locator("#aether3d");
+  await chapter.scrollIntoViewIfNeeded();
+  const centered=await chapter.getAttribute("data-evidence-progress");
+  await page.evaluate(()=>scrollBy(0,420));await page.waitForTimeout(80);
+  const leaving=await chapter.getAttribute("data-evidence-progress");
+  expect(centered).not.toBeNull();expect(leaving).not.toBeNull();expect(centered).not.toBe(leaving);
+  const transform=await chapter.locator(".media-primary").evaluate(el=>getComputedStyle(el).transform);
+  expect(transform).not.toBe("none");
+});
+
+test("project sheen and shadow respond to pointer",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","media light probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  const media=page.locator("#kairos .project-media");await media.scrollIntoViewIfNeeded();const box=await media.boundingBox();expect(box).not.toBeNull();
+  await page.mouse.move(box!.x+box!.width*.82,box!.y+box!.height*.25);
+  await expect.poll(()=>media.getAttribute("data-pointer-depth"),{timeout:2000}).not.toBe("0.00,0.00");
+  await expect.poll(async()=>Math.abs(parseFloat(await media.evaluate(el=>(el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||"0")),{timeout:2000}).toBeGreaterThan(4);
+  const sheen=media.locator(".media-sheen");
+  await expect(sheen).toHaveCount(1);
+});
