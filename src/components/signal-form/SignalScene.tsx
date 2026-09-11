@@ -57,8 +57,8 @@ function digitFourShape(){
   shape.lineTo(-.16,1.04);
   const hole=new THREE.Path();
   hole.moveTo(-.19,.58);
-  hole.lineTo(-.19,.08);
   hole.lineTo(-.53,.08);
+  hole.lineTo(-.19,.08);
   hole.lineTo(-.19,.58);
   shape.holes.push(hole);
   return shape;
