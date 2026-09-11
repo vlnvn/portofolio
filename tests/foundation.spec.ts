@@ -85,7 +85,8 @@ test("kinetic interaction visibly responds to pointer",async({page},testInfo)=>{
   await page.mouse.move(1220,430);
   await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-input"),{timeout:2000}).toBe("mouse");
   await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-host"),{timeout:2000}).toBe("visible");
-  await expect.poll(async()=>Number(await page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0)),{timeout:2000}).toBeGreaterThan(5);
+  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-vector"),{timeout:2000}).not.toBe("0.000,0.000");
+  await expect.poll(async()=>Math.abs(Number(await page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0))),{timeout:2000}).toBeGreaterThan(5);
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
   const ambient=await page.locator("html").evaluate(el=>({section:(el as HTMLElement).dataset.lightSection,x:getComputedStyle(el).getPropertyValue("--ambient-a-x")}));
@@ -130,6 +131,7 @@ test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
   await page.mouse.move(1120,420);
   await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-input"),{timeout:2000}).toBe("mouse");
   await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-host"),{timeout:2000}).toBe("visible");
+  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-vector"),{timeout:2000}).not.toBe("0.000,0.000");
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });

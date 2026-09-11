@@ -136,9 +136,10 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
       const hy=responsive?clamp((pointer.clientY-bounds.top)/Math.max(bounds.height,1)*2-1):0;
       document.documentElement.dataset.kineticHost=visible?"visible":"hidden";
       const changed=Math.abs(lastHost.current.x-hx)>.0005||Math.abs(lastHost.current.y-hy)>.0005;
-      if(!changed)return;
-      lastHost.current={x:hx,y:hy};
-      setTilt(current=>Math.abs(current.x-hx)<.0005&&Math.abs(current.y-hy)<.0005?current:{x:hx,y:hy});
+      if(changed){
+        lastHost.current={x:hx,y:hy};
+        setTilt(current=>Math.abs(current.x-hx)<.0005&&Math.abs(current.y-hy)<.0005?current:{x:hx,y:hy});
+      }
       const portrait=host.querySelector<HTMLElement>(".portrait");
       if(portrait){
         setValue(portrait,"--portrait-x",hx*18);
@@ -150,6 +151,7 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
         setValue(portrait,"--portrait-shadow-x",-hx*20);
         setValue(portrait,"--portrait-shadow-y",30-hy*14);
       }
+      document.documentElement.dataset.kineticVector=`${hx.toFixed(3)},${hy.toFixed(3)}`;
     };
 
     const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
