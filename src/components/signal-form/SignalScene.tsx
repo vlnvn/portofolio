@@ -32,9 +32,9 @@ const shapes:Record<ArtifactState,Shape>={
   },
   kairos:{
     rigRotation:[.12,-.34,.06],rigScale:.93,spin:.08,idle:.28,interaction:.24,
-    boxes:[P([0,0,0],[0,0,0],[1.12,.78,.64]),P([0,0,.67],[0,0,0],[.18,.79,.055]),P([0,0,.68],[0,0,0],[1.13,.16,.055])],
+    boxes:[P([0,0,0],[0,0,0],[1.12,.78,.64]),P([0,0,.35],[0,0,0],[.18,.79,.055]),P([0,0,.36],[0,0,0],[1.13,.16,.055])],
     cylinders:[H,H],
-    spheres:[P([-.86,-.57,.52],[0,0,0],[.07,.07,.07]),P([.86,-.57,.52],[0,0,0],[.07,.07,.07]),P([.86,.57,.52],[0,0,0],[.07,.07,.07])],
+    spheres:[P([-.86,-.57,.36],[0,0,0],[.07,.07,.07]),P([.86,-.57,.36],[0,0,0],[.07,.07,.07]),P([.86,.57,.36],[0,0,0],[.07,.07,.07])],
     tori:[H,H,H],
   },
   kalintang:{
@@ -46,17 +46,17 @@ const shapes:Record<ArtifactState,Shape>={
   },
   sambut:{
     rigRotation:[.03,-.22,.02],rigScale:.92,spin:.04,idle:.3,interaction:.2,
-    boxes:[P([0,0,0],[0,0,0],[1.15,.78,.08]),P([-.42,.14,.12],[0,0,0],[.12,.38,.085]),P([-.42,.14,.13],[0,0,0],[.38,.12,.085])],
+    boxes:[P([0,0,0],[0,0,0],[1.15,.78,.08]),P([-.42,.14,.07],[0,0,0],[.12,.38,.085]),P([-.42,.14,.075],[0,0,0],[.38,.12,.085])],
     cylinders:[P([.5,-.18,.12],[0,0,0],[.08,.28,.08]),H],
-    spheres:[P([.42,.2,.14],[0,0,0],[.18,.18,.1]),P([.42,-.17,.14],[0,0,0],[.07,.07,.05]),P([.66,-.17,.14],[0,0,0],[.07,.07,.05])],
+    spheres:[P([.42,.2,.08],[0,0,0],[.18,.18,.1]),P([.42,-.17,.08],[0,0,0],[.07,.07,.05]),P([.66,-.17,.08],[0,0,0],[.07,.07,.05])],
     tori:[H,H,H],
   },
   colors:{
     rigRotation:[.03,-.18,-.02],rigScale:.9,spin:.05,idle:.32,interaction:.2,
     boxes:[P([0,0,0],[0,0,0],[1.05,.68,.42]),P([-.28,.47,.02],[0,0,0],[.4,.18,.22]),P([.44,.43,.03],[0,0,0],[.18,.1,.12])],
-    cylinders:[P([.18,-.03,.45],[Math.PI/2,0,0],[.43,.33,.43]),H],
+    cylinders:[P([.18,-.03,.38],[Math.PI/2,0,0],[.43,.33,.43]),H],
     spheres:[P([-.62,.12,.46],[0,0,0],[.07,.07,.07]),H,H],
-    tori:[P([.18,-.03,.77],[0,0,0],[.45,.45,.45]),H,H],
+    tori:[P([.18,-.03,.58],[0,0,0],[.45,.45,.45]),H,H],
   },
   aether:{
     rigRotation:[.22,-.38,.08],rigScale:.93,spin:.42,idle:.4,interaction:.28,
@@ -216,12 +216,12 @@ function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
   useEffect(()=>()=>{box.dispose();torus.dispose();},[box,torus]);
   useEffect(()=>{const timer=window.setInterval(()=>{if(!document.hidden)invalidate();},40);return()=>window.clearInterval(timer);},[invalidate]);
   const bars=[
-    {p:[-1.35,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
-    {p:[-.95,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
-    {p:[-1.2,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
-    {p:[.62,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
-    {p:[1.02,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
-    {p:[.77,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
+    {p:[-1.5,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
+    {p:[-1.08,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
+    {p:[-1.34,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
+    {p:[.78,.15,0] as Vec3,r:[0,0,-.48] as Vec3,s:[.13,.92,.12] as Vec3},
+    {p:[1.2,0,0] as Vec3,r:[0,0,0] as Vec3,s:[.13,1.22,.12] as Vec3},
+    {p:[.94,-.05,.02] as Vec3,r:[0,0,Math.PI/2] as Vec3,s:[.13,.66,.12] as Vec3},
   ];
   useFrame(({clock},delta)=>{
     const dx=target.current.x*.07-current.current.x,dy=-target.current.y*.06-current.current.y,alpha=1-Math.exp(-9*delta);
