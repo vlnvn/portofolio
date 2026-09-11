@@ -6,14 +6,14 @@ export type ApertureRigState = {
 
 export const apertureRigState:ApertureRigState={
   rings:[
-    {radius:1.2,tube:.035,arc:Math.PI*2,position:[0,0,.04],rotation:[1.13,.2,.18]},
-    {radius:.82,tube:.048,arc:Math.PI*2,position:[.05,-.02,.34],rotation:[.72,-.48,-.32]},
-    {radius:1.48,tube:.026,arc:Math.PI*1.48,position:[-.04,.08,-.34],rotation:[1.42,.5,.74]},
+    {radius:1.16,tube:.03,arc:Math.PI*2,position:[-.02,.02,.08],rotation:[1.06,.28,.1]},
+    {radius:.82,tube:.045,arc:Math.PI*2,position:[.08,-.05,.36],rotation:[.62,-.54,-.28]},
+    {radius:1.48,tube:.024,arc:Math.PI*1.66,position:[-.08,.07,-.3],rotation:[1.38,.58,.72]},
   ],
   blades:[
-    {position:[-1.08,.5,.48],rotation:[-.32,.58,-.5],scale:[.92,.34,.11]},
-    {position:[.18,-1.02,.06],rotation:[.48,-.34,.72],scale:[1.02,.36,.11]},
-    {position:[1.1,.42,-.18],rotation:[-.2,.7,.4],scale:[.88,.32,.11]},
+    {position:[-.92,.46,.4],rotation:[.7,.18,.92],scale:[.52,.94,.42]},
+    {position:[.08,-.94,.08],rotation:[.34,-.46,-.18],scale:[.46,1.02,.38]},
+    {position:[.96,.34,-.2],rotation:[-.58,.52,-.9],scale:[.5,.9,.4]},
   ],
-  nodes:[[-1.5,-.46,.18],[-.7,1.15,.5],[.1,.76,-.22],[.82,-.76,.66],[1.48,.38,.12]],
+  nodes:[[-1.42,-.5,.2],[-.64,1.12,.54],[.08,.7,-.26],[.78,-.74,.7],[1.42,.4,.14]],
 };
