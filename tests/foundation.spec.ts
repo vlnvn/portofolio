@@ -60,83 +60,6 @@ test("case studies preserve theme control and return path",async({page},testInfo
   await expect(page.getByRole("link",{name:"Return to selected work"}).last()).toHaveAttribute("href","/#kairos");
 });
 
-test("hero aperture is foreground and portrait responds spatially",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","desktop spatial-layer probe runs once");
-  await page.setViewportSize({width:1440,height:900});
-  await page.goto("/");
-  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
-  const order=await page.evaluate(()=>{
-    const signal=document.querySelector<HTMLElement>(".signal-layer");
-    const portrait=document.querySelector<HTMLElement>(".portrait");
-    return {signal:Number(getComputedStyle(signal!).zIndex),portrait:Number(getComputedStyle(portrait!).zIndex)};
-  });
-  expect(order.signal).toBeGreaterThan(order.portrait);
-  await page.mouse.move(1200,420);
-  await expect.poll(()=>page.locator(".portrait").evaluate(el=>(el as HTMLElement).style.getPropertyValue("--portrait-x")),{timeout:2000}).not.toBe("0.00px");
-});
-
-test("kinetic interaction visibly responds to pointer",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","spatial interaction probe runs once");
-  await page.setViewportSize({width:1440,height:900});
-  await page.goto("/");
-  await expect.poll(()=>page.locator(".signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
-  await page.waitForTimeout(1000);
-  const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
-  await page.mouse.move(1220,430);
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-input"),{timeout:2000}).toBe("mouse");
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-host"),{timeout:2000}).toBe("visible");
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-vector"),{timeout:2000}).not.toBe("0.000,0.000");
-  await expect.poll(async()=>Math.abs(Number(await page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0))),{timeout:2000}).toBeGreaterThan(5);
-  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
-  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
-  const ambient=await page.locator("html").evaluate(el=>({section:(el as HTMLElement).dataset.lightSection,x:getComputedStyle(el).getPropertyValue("--ambient-a-x")}));
-  expect(ambient.section).toBe("top");
-  expect(ambient.x.trim()).not.toBe("0px");
-});
-
-test("project media light and shadow follow the pointer",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","media depth probe runs once");
-  await page.setViewportSize({width:1440,height:900});
-  await page.goto("/");
-  await page.locator("#kairos .project-media").scrollIntoViewIfNeeded();
-  const media=page.locator("#kairos .project-media");
-  const box=await media.boundingBox();
-  expect(box).not.toBeNull();
-  await page.mouse.move(box!.x+box!.width*.82,box!.y+box!.height*.28);
-  await expect.poll(()=>media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-light-x"))||0)).toBeGreaterThan(5);
-  await expect.poll(async()=>Math.abs(Number(await media.evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||0))),{timeout:2000}).toBeGreaterThan(2);
-});
-
-test("continuous ambient field removes per-section color seams",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","visual-structure probe runs once");
-  await page.goto("/");
-  const result=await page.evaluate(()=>{
-    const ids=["top","kairos","ayam-kalintang","sambut","colors","aether3d","nara"];
-    return ids.map(id=>{
-      const element=document.getElementById(id)!;
-      return {id,before:getComputedStyle(element,"::before").display,after:getComputedStyle(element,"::after").display,background:getComputedStyle(element).backgroundColor};
-    });
-  });
-  for(const item of result){expect(item.before).toBe("none");expect(item.after).toBe("none");expect(item.background).toBe("rgba(0, 0, 0, 0)");}
-});
-
-test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","404 WebGL probe runs once");
-  await page.setViewportSize({width:1440,height:900});
-  const response=await page.goto("/missing-interactive-page");
-  expect(response?.status()).toBe(404);
-  await expect.poll(()=>page.locator(".not-found .signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
-  await page.waitForTimeout(1200);
-  const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
-  await page.mouse.move(1120,420);
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-input"),{timeout:2000}).toBe("mouse");
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-host"),{timeout:2000}).toBe("visible");
-  await expect.poll(()=>page.locator("html").getAttribute("data-kinetic-vector"),{timeout:2000}).not.toBe("0.000,0.000");
-  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
-  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
-});
-
-
 test("portrait responds only while cursor is over portrait",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="chromium","spatial portrait probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
@@ -162,13 +85,14 @@ test("aperture responds directly to mouse in hero and 404",async({page},testInfo
   await page.waitForTimeout(1000);const before404=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1140,390);
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before404);
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });
 
 test("kinetic evidence sequence changes project media with scroll",async({page},testInfo)=>{
   test.skip(testInfo.project.name!=="chromium","scroll choreography probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   const chapter=page.locator("#aether3d");
-  await chapter.scrollIntoViewIfNeeded();
+  await chapter.scrollIntoViewIfNeeded();await page.waitForTimeout(80);
   const centered=await chapter.getAttribute("data-evidence-progress");
   await page.evaluate(()=>scrollBy(0,420));await page.waitForTimeout(80);
   const leaving=await chapter.getAttribute("data-evidence-progress");
@@ -184,6 +108,19 @@ test("project sheen and shadow respond to pointer",async({page},testInfo)=>{
   await page.mouse.move(box!.x+box!.width*.82,box!.y+box!.height*.25);
   await expect.poll(()=>media.getAttribute("data-pointer-depth"),{timeout:2000}).not.toBe("0.00,0.00");
   await expect.poll(async()=>Math.abs(parseFloat(await media.evaluate(el=>(el as HTMLElement).style.getPropertyValue("--media-shadow-x"))||"0")),{timeout:2000}).toBeGreaterThan(4);
-  const sheen=media.locator(".media-sheen");
-  await expect(sheen).toHaveCount(1);
+  await expect(media.locator(".media-sheen")).toHaveCount(1);
+});
+
+test("projects stay seamless while contact keeps an intentional divider",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","visual structure probe runs once");
+  await page.goto("/");
+  const result=await page.evaluate(()=>{
+    const ids=["top","kairos","ayam-kalintang","sambut","colors","aether3d","nara"];
+    return {
+      sections:ids.map(id=>{const element=document.getElementById(id)!;return {id,before:getComputedStyle(element,"::before").display,after:getComputedStyle(element,"::after").display,background:getComputedStyle(element).backgroundColor};}),
+      contactBorder:getComputedStyle(document.getElementById("contact")!).borderTopWidth
+    };
+  });
+  for(const item of result.sections){expect(item.before).toBe("none");expect(item.after).toBe("none");expect(item.background).toBe("rgba(0, 0, 0, 0)");}
+  expect(parseFloat(result.contactBorder)).toBeGreaterThanOrEqual(1);
 });
