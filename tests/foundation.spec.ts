@@ -84,7 +84,7 @@ test("kinetic interaction visibly responds to pointer",async({page},testInfo)=>{
   const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1220,430);
   await expect.poll(async()=>Number(await page.locator(".portrait").evaluate(el=>parseFloat((el as HTMLElement).style.getPropertyValue("--portrait-x"))||0)),{timeout:2000}).toBeGreaterThan(5);
-  await expect.poll(()=>Number(page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
   const ambient=await page.locator("html").evaluate(el=>({section:(el as HTMLElement).dataset.lightSection,x:getComputedStyle(el).getPropertyValue("--ambient-a-x")}));
   expect(ambient.section).toBe("top");
@@ -126,5 +126,5 @@ test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
   await page.waitForTimeout(900);
   const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1120,420);
-  await expect.poll(()=>Number(page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+  await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
 });
