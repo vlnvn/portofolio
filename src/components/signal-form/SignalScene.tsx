@@ -136,10 +136,10 @@ function ResponsiveLights({target,dark}:{target:MotionRef;dark:boolean}){
   return <><ambientLight intensity={dark?.48:.68}/><directionalLight ref={key} position={[-2.8,3.6,4.9]} intensity={dark?2.9:3.15}/><directionalLight ref={fill} position={[3.4,-1.6,2.55]} intensity={dark?.85:1.05}/><directionalLight ref={rim} position={[-3.6,-2.3,1.9]} intensity={dark?1:.72}/><pointLight ref={point} color={dark?"#8CB6FF":"#1757AF"} position={[0,0,2.75]} intensity={dark?4.7:3.9} distance={8} decay={2}/></>;
 }
 
-type ObjectRefs=Record<ArtifactState,THREE.Group|null>;
-
 function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactRef;dark:boolean}){
-  const rig=useRef<THREE.Group>(null),core=useRef<THREE.Group>(null),objects=useRef<ObjectRefs>({hero:null,kairos:null,kalintang:null,sambut:null,colors:null,aether:null,nara:null});
+  const rig=useRef<THREE.Group>(null),core=useRef<THREE.Group>(null);
+  const heroRef=useRef<THREE.Group>(null),kairosRef=useRef<THREE.Group>(null),kalintangRef=useRef<THREE.Group>(null),sambutRef=useRef<THREE.Group>(null),colorsRef=useRef<THREE.Group>(null),aetherRef=useRef<THREE.Group>(null),naraRef=useRef<THREE.Group>(null);
+  const heroRingA=useRef<THREE.Mesh>(null),heroRingB=useRef<THREE.Mesh>(null),heroRingC=useRef<THREE.Mesh>(null);
   const current=useRef({x:0,y:0});
   const {invalidate,gl}=useThree();
   const m=useMaterials(dark);
@@ -169,14 +169,14 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
   useFrame(({clock},delta)=>{
     const from=artifact.current.from,to=artifact.current.to,t=clamp01(artifact.current.t);
     const settled=from===to;
-    for(const state of Object.keys(objects.current) as ArtifactState[]){
-      const group=objects.current[state];
-      if(!group)continue;
+    const applyState=(state:ArtifactState,group:THREE.Group|null)=>{
+      if(!group)return;
       group.visible=settled?state===from:(state===from&&t<.52)||(state===to&&t>.48);
       if(settled&&state===from){group.scale.setScalar(1);group.rotation.z=0;}
       else if(state===from&&t<.52){const p=ease(t/.52);group.scale.setScalar(lerp(1,.035,p));group.rotation.z=p*.42;}
       else if(state===to&&t>.48){const p=ease((t-.48)/.52);group.scale.setScalar(lerp(.035,1,p));group.rotation.z=(1-p)*-.42;}
-    }
+    };
+    applyState("hero",heroRef.current);applyState("kairos",kairosRef.current);applyState("kalintang",kalintangRef.current);applyState("sambut",sambutRef.current);applyState("colors",colorsRef.current);applyState("aether",aetherRef.current);applyState("nara",naraRef.current);
 
     if(core.current){
       core.current.visible=!settled;
@@ -203,11 +203,9 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       rig.current.position.set(target.current.x*.1*strength,-target.current.y*.075*strength,Math.abs(target.current.x)*.05*strength);
     }
 
-    const hero=objects.current.hero;
-    if(hero){
-      const rings=hero.children.filter(child=>child.userData.ring) as THREE.Mesh[];
-      rings.forEach((ring,index)=>{ring.rotation.z=clock.elapsedTime*([.31,-.24,.18][index]??.2);});
-    }
+    if(heroRingA.current)heroRingA.current.rotation.z=clock.elapsedTime*.31;
+    if(heroRingB.current)heroRingB.current.rotation.z=clock.elapsedTime*-.24;
+    if(heroRingC.current)heroRingC.current.rotation.z=clock.elapsedTime*.18;
 
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
@@ -217,13 +215,11 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
-  const refFor=(state:ArtifactState)=>(node:THREE.Group|null)=>{objects.current[state]=node;};
-
   return <group ref={rig}>
-    <group ref={refFor("hero")} rotation={[-.08,.12,0]}>
-      <mesh userData={{ring:true}} rotation={[1.08,.28,.1]} material={m.energy} geometry={g.torus}/>
-      <mesh userData={{ring:true}} rotation={[.64,-.56,-.28]} scale={.73} material={m.ice} geometry={g.torus}/>
-      <mesh userData={{ring:true}} rotation={[1.38,.58,.72]} scale={1.18} material={m.energy} geometry={g.thinTorus}/>
+    <group ref={heroRef} rotation={[-.08,.12,0]}>
+      <mesh ref={heroRingA} rotation={[1.08,.28,.1]} material={m.energy} geometry={g.torus}/>
+      <mesh ref={heroRingB} rotation={[.64,-.56,-.28]} scale={.73} material={m.ice} geometry={g.torus}/>
+      <mesh ref={heroRingC} rotation={[1.38,.58,.72]} scale={1.18} material={m.energy} geometry={g.thinTorus}/>
       <mesh position={[-.78,.4,.2]} rotation={[-.18,.34,-.5]} scale={[.86,.26,.12]} material={m.energy} geometry={g.box}/>
       <mesh position={[.04,-.78,.08]} rotation={[.42,-.2,.68]} scale={[.92,.28,.12]} material={m.deep} geometry={g.box}/>
       <mesh position={[.84,.32,-.14]} rotation={[-.18,.54,.34]} scale={[.82,.25,.11]} material={m.ice} geometry={g.box}/>
@@ -232,7 +228,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[1.24,.34,.1]} scale={.085} material={m.ice} geometry={g.sphere}/>
     </group>
 
-    <group ref={refFor("kairos")} rotation={[-.3,.56,.05]}>
+    <group ref={kairosRef} rotation={[-.3,.56,.05]}>
       <mesh scale={[1.62,1.12,1.12]} material={m.kraft} geometry={g.box}/>
       <lineSegments scale={[1.625,1.125,1.125]} geometry={g.edges} material={m.edge}/>
       <mesh position={[0,0,.575]} scale={[.25,1.125,.025]} material={m.tape} geometry={g.box}/>
@@ -241,7 +237,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[.43,-.11,.615]} scale={[.26,.028,.01]} material={m.deep} geometry={g.box}/>
     </group>
 
-    <group ref={refFor("kalintang")} rotation={[.02,-.28,-.55]}>
+    <group ref={kalintangRef} rotation={[.02,-.28,-.55]}>
       <mesh position={[.16,.27,0]} scale={[.92,.92,.92]} material={m.meat} geometry={g.drumstick}/>
       <mesh position={[-.55,-.76,.02]} rotation={[0,0,-.03]} scale={[.16,.78,.16]} material={m.bone} geometry={g.cylinder}/>
       <mesh position={[-.66,-1.16,.03]} scale={[.2,.17,.16]} material={m.bone} geometry={g.sphere}/>
@@ -249,7 +245,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[.13,.45,.2]} scale={[.32,.42,.08]} material={m.meatLight} geometry={g.sphere}/>
     </group>
 
-    <group ref={refFor("sambut")} rotation={[-.08,.18,.02]}>
+    <group ref={sambutRef} rotation={[-.08,.18,.02]}>
       <mesh material={m.med} geometry={g.card}/>
       <mesh position={[0,.8,.01]} scale={[.42,.24,.8]} material={m.silver} geometry={g.smallRounded}/>
       <mesh position={[-.66,.12,.11]} scale={[.12,.42,.08]} material={m.teal} geometry={g.box}/>
@@ -260,7 +256,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[.55,-.43,.12]} scale={[.3,.045,.035]} material={m.silver} geometry={g.box}/>
     </group>
 
-    <group ref={refFor("colors")} rotation={[-.08,.18,-.02]}>
+    <group ref={colorsRef} rotation={[-.08,.18,-.02]}>
       <mesh material={m.camera} geometry={g.cameraBody}/>
       <mesh position={[-.46,.76,.02]} scale={[.72,.34,.9]} material={m.camera} geometry={g.smallRounded}/>
       <mesh position={[.83,.46,.23]} scale={[.28,.16,.08]} material={m.silver} geometry={g.box}/>
@@ -270,7 +266,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[-.82,.65,.25]} rotation={[Math.PI/2,0,0]} scale={[.09,.1,.09]} material={m.energy} geometry={g.cylinder}/>
     </group>
 
-    <group ref={refFor("aether")} rotation={[-.28,.46,.08]}>
+    <group ref={aetherRef} rotation={[-.28,.46,.08]}>
       <mesh scale={[1.35,1.35,1.35]} material={m.glass} geometry={g.box}/>
       <lineSegments scale={[1.36,1.36,1.36]} geometry={g.edges} material={m.edge}/>
       <mesh position={[.88,.72,.56]} scale={[.36,.36,.36]} material={m.ice} geometry={g.box}/>
@@ -283,7 +279,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
       <mesh position={[0,0,2.08]} rotation={[Math.PI/2,0,0]} material={m.zAxis} geometry={g.cone}/>
     </group>
 
-    <group ref={refFor("nara")} rotation={[-.24,.18,-.03]}>
+    <group ref={naraRef} rotation={[-.24,.18,-.03]}>
       <mesh rotation={[Math.PI/2,0,0]} scale={[1.08,.12,1.08]} material={m.plate} geometry={g.plate}/>
       <mesh position={[0,0,.12]} rotation={[Math.PI/2,0,0]} scale={[.72,.08,.72]} material={m.ice} geometry={g.plate}/>
       <mesh position={[-1.22,-.08,.08]} scale={[.09,.82,.07]} material={m.silver} geometry={g.box}/>
@@ -334,16 +330,18 @@ function Error404Rig({target,dark}:{target:MotionRef;dark:boolean}){
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
-  const Four=({refProp}:{refProp:React.RefObject<THREE.Group|null>})=><group ref={refProp}>
-    <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
-    <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
-    <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
-  </group>;
-
   return <group ref={group} scale={.92}>
-    <group position={[-1.3,0,0]}><Four refProp={left}/></group>
+    <group ref={left} position={[-1.3,0,0]}>
+      <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
+      <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
+      <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
+    </group>
     <mesh ref={zero} position={[0,0,.02]} material={m.silver} geometry={g.torus}/>
-    <group position={[1.3,0,0]}><Four refProp={right}/></group>
+    <group ref={right} position={[1.3,0,0]}>
+      <mesh position={[-.18,.24,0]} rotation={[0,0,-.62]} scale={[1.18,1,1]} material={m.energy} geometry={g.bar}/>
+      <mesh position={[.22,0,0]} rotation={[0,0,Math.PI/2]} scale={[1.55,1,1]} material={m.ice} geometry={g.bar}/>
+      <mesh position={[-.08,-.03,.03]} scale={[1.05,1,1]} material={m.deep} geometry={g.bar}/>
+    </group>
   </group>;
 }
 
