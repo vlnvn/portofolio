@@ -167,3 +167,14 @@ test("rapid scroll uses inertial artifact travel instead of teleporting",async({
   await expect.poll(()=>artifact.getAttribute("data-artifact-motion"),{timeout:3000}).toBe("settled");
   await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("nara");
 });
+
+
+test("NARA nutrition compass stays in one stable semantic model during idle motion",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","NARA model probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-state"),{timeout:4000}).toBe("nara");
+  await expect.poll(()=>page.locator("html").getAttribute("data-nara-model"),{timeout:2000}).toBe("nutrition-compass-v2");
+  await page.waitForTimeout(900);
+  await expect(page.locator("html")).toHaveAttribute("data-nara-model","nutrition-compass-v2");
+});

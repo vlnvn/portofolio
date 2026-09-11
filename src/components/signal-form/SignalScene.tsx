@@ -64,14 +64,26 @@ function digitFourShape(){
   return shape;
 }
 
-function sectorGeometry(radius:number,start:number,end:number){
-  const inset=.035;
+function annularSectorGeometry(inner:number,outer:number,start:number,end:number){
+  const inset=.045;
+  const a0=start+inset,a1=end-inset;
   const shape=new THREE.Shape();
-  shape.moveTo(0,0);
-  shape.lineTo(Math.cos(start+inset)*radius,Math.sin(start+inset)*radius);
-  shape.absarc(0,0,radius,start+inset,end-inset,false);
-  shape.lineTo(0,0);
-  return extrude(shape,.085,.018);
+  shape.moveTo(Math.cos(a0)*inner,Math.sin(a0)*inner);
+  shape.lineTo(Math.cos(a0)*outer,Math.sin(a0)*outer);
+  shape.absarc(0,0,outer,a0,a1,false);
+  shape.lineTo(Math.cos(a1)*inner,Math.sin(a1)*inner);
+  shape.absarc(0,0,inner,a1,a0,true);
+  shape.closePath();
+  return extrude(shape,.11,.018);
+}
+
+function leafGeometry(){
+  const shape=new THREE.Shape();
+  shape.moveTo(-.04,-.36);
+  shape.bezierCurveTo(.1,-.12,.38,.06,.5,.36);
+  shape.bezierCurveTo(.16,.34,-.16,.18,-.42,-.1);
+  shape.bezierCurveTo(-.3,-.22,-.18,-.31,-.04,-.36);
+  return extrude(shape,.08,.016);
 }
 
 const baseRotation:Record<ArtifactState,[number,number,number]>={
@@ -191,7 +203,7 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
   const heroRingA=useRef<THREE.Mesh>(null),heroRingB=useRef<THREE.Mesh>(null),heroRingC=useRef<THREE.Mesh>(null);
   const heroBladeA=useRef<THREE.Mesh>(null),heroBladeB=useRef<THREE.Mesh>(null),heroBladeC=useRef<THREE.Mesh>(null);
   const heroNodeA=useRef<THREE.Mesh>(null),heroNodeB=useRef<THREE.Mesh>(null),heroNodeC=useRef<THREE.Mesh>(null),heroNodeD=useRef<THREE.Mesh>(null),heroNodeE=useRef<THREE.Mesh>(null);
-  const naraA=useRef<THREE.Mesh>(null),naraB=useRef<THREE.Mesh>(null),naraC=useRef<THREE.Mesh>(null),naraD=useRef<THREE.Mesh>(null);
+  const naraCore=useRef<THREE.Group>(null);
   const current=useRef({x:0,y:0});
   const {invalidate,gl}=useThree();
   const m=useMaterials(dark);
@@ -212,14 +224,15 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     const smallRounded=extrude(roundedRectShape(1,.55,.14),.18,.035);
     const drumstick=drumstickMeatGeometry();
     const four=extrude(digitFourShape(),.24,.045);
-    const naraVeg=sectorGeometry(.76,.02,Math.PI*2/3);
-    const naraFruit=sectorGeometry(.76,Math.PI*2/3,Math.PI);
-    const naraCarb=sectorGeometry(.76,Math.PI,Math.PI*5/3);
-    const naraProtein=sectorGeometry(.76,Math.PI*5/3,Math.PI*2-.02);
+    const naraVeg=annularSectorGeometry(.42,.82,.02,Math.PI*2/3);
+    const naraFruit=annularSectorGeometry(.42,.82,Math.PI*2/3,Math.PI);
+    const naraCarb=annularSectorGeometry(.42,.82,Math.PI,Math.PI*5/3);
+    const naraProtein=annularSectorGeometry(.42,.82,Math.PI*5/3,Math.PI*2-.02);
+    const naraLeaf=leafGeometry();
     const edges=new THREE.EdgesGeometry(box,25);
     const plate=new THREE.CylinderGeometry(1,1,.12,64,1,false);
     const cone=new THREE.ConeGeometry(.11,.28,24);
-    return {box,cylinder,sphere,torus,thinTorus,heroRing0,heroRing1,heroRing2,heroBlade,heroNode,card,cameraBody,smallRounded,drumstick,four,naraVeg,naraFruit,naraCarb,naraProtein,edges,plate,cone};
+    return {box,cylinder,sphere,torus,thinTorus,heroRing0,heroRing1,heroRing2,heroBlade,heroNode,card,cameraBody,smallRounded,drumstick,four,naraVeg,naraFruit,naraCarb,naraProtein,naraLeaf,edges,plate,cone};
   },[]);
   useEffect(()=>()=>{Object.values(g).forEach(geometry=>geometry.dispose());},[g]);
 
@@ -289,17 +302,18 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     if(heroNodeC.current){heroNodeC.current.position.set(.08+Math.sin(ht*.72+1.5)*.05,.7+Math.cos(ht*.67+1.2)*.045,-.26+Math.sin(ht*.49+1)*.035);}
     if(heroNodeD.current){heroNodeD.current.position.set(.78+Math.cos(ht*.62+2.1)*.05,-.74+Math.sin(ht*.7+2)*.045,.7+Math.cos(ht*.46+1.8)*.035);}
     if(heroNodeE.current){heroNodeE.current.position.set(1.42+Math.sin(ht*.68+2.8)*.05,.4+Math.cos(ht*.6+2.5)*.05,.14+Math.sin(ht*.44+2.4)*.03);}
-    const naraPulse=.012;
-    if(naraA.current)naraA.current.position.z=.18+Math.sin(ht*.52)*naraPulse;
-    if(naraB.current)naraB.current.position.z=.18+Math.sin(ht*.52+1.2)*naraPulse;
-    if(naraC.current)naraC.current.position.z=.18+Math.sin(ht*.52+2.4)*naraPulse;
-    if(naraD.current)naraD.current.position.z=.18+Math.sin(ht*.52+3.6)*naraPulse;
+    if(naraCore.current){
+      const pulse=1+Math.sin(ht*.48)*.025;
+      naraCore.current.scale.setScalar(pulse);
+      naraCore.current.rotation.z=Math.sin(ht*.34)*.035;
+    }
 
     document.documentElement.dataset.signalFrames=String((Number(document.documentElement.dataset.signalFrames)||0)+1);
     document.documentElement.dataset.signalCalls=String(gl.info.render.calls);
     document.documentElement.dataset.signalTriangles=String(gl.info.render.triangles);
     document.documentElement.dataset.signalTilt=`${current.current.x.toFixed(3)},${current.current.y.toFixed(3)}`;
     document.documentElement.dataset.signalState=settled?from:`${from}-${to}`;
+    if(settled&&from==="nara")document.documentElement.dataset.naraModel="nutrition-compass-v2";else delete document.documentElement.dataset.naraModel;
     if(Math.abs(dx)>.00035||Math.abs(dy)>.00035)invalidate();
   });
 
@@ -370,20 +384,21 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     </group>
 
     <group ref={naraRef} rotation={baseRotation.nara}>
-      <mesh rotation={[Math.PI/2,0,0]} scale={[1.12,.11,1.12]} material={m.plate} geometry={g.plate}/>
-      <mesh position={[0,0,.095]} scale={[1.04,1.04,1.04]} material={m.silver} geometry={g.torus}/>
-      <mesh ref={naraA} position={[0,0,.18]} material={m.green} geometry={g.naraVeg}/>
-      <mesh ref={naraB} position={[0,0,.18]} material={m.fruit} geometry={g.naraFruit}/>
-      <mesh ref={naraC} position={[0,0,.18]} material={m.carb} geometry={g.naraCarb}/>
-      <mesh ref={naraD} position={[0,0,.18]} material={m.protein} geometry={g.naraProtein}/>
-      <mesh position={[-1.24,-.08,.11]} scale={[.07,.7,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.36,.66,.11]} scale={[.025,.22,.045]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.28,.66,.11]} scale={[.025,.22,.045]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.20,.66,.11]} scale={[.025,.22,.045]} material={m.silver} geometry={g.box}/>
-      <mesh position={[-1.12,.66,.11]} scale={[.025,.22,.045]} material={m.silver} geometry={g.box}/>
-      <mesh position={[1.24,-.12,.11]} scale={[.07,.66,.055]} material={m.silver} geometry={g.box}/>
-      <mesh position={[1.24,.58,.12]} scale={[.19,.28,.07]} material={m.silver} geometry={g.sphere}/>
-      <mesh position={[0,0,.28]} scale={.1} material={m.deep} geometry={g.sphere}/>
+      <mesh rotation={[Math.PI/2,0,0]} scale={[1.05,.1,1.05]} material={m.plate} geometry={g.plate}/>
+      <mesh position={[0,0,.1]} scale={[1.0,1.0,1.0]} material={m.silver} geometry={g.torus}/>
+      <mesh position={[0,0,.185]} material={m.green} geometry={g.naraVeg}/>
+      <mesh position={[0,0,.185]} material={m.fruit} geometry={g.naraFruit}/>
+      <mesh position={[0,0,.185]} material={m.carb} geometry={g.naraCarb}/>
+      <mesh position={[0,0,.185]} material={m.protein} geometry={g.naraProtein}/>
+      <group ref={naraCore} position={[0,0,.25]}>
+        <mesh rotation={[Math.PI/2,0,0]} scale={[.36,.09,.36]} material={m.med} geometry={g.plate}/>
+        <mesh position={[-.09,.02,.08]} rotation={[0,0,-.58]} scale={[.52,.52,.52]} material={m.green} geometry={g.naraLeaf}/>
+        <mesh position={[.11,.04,.085]} rotation={[0,0,2.2]} scale={[.42,.42,.42]} material={m.ice} geometry={g.naraLeaf}/>
+        <mesh position={[0,-.13,.075]} scale={[.035,.22,.035]} rotation={[0,0,-.08]} material={m.deep} geometry={g.cylinder}/>
+      </group>
+      <mesh position={[0,-1.02,.03]} scale={[.46,.035,.035]} material={m.silver} geometry={g.box}/>
+      <mesh position={[-.54,-1.02,.03]} scale={[.035,.18,.035]} material={m.silver} geometry={g.box}/>
+      <mesh position={[.54,-1.02,.03]} scale={[.035,.18,.035]} material={m.silver} geometry={g.box}/>
     </group>
 
     <group ref={core} visible={false}>
