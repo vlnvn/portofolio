@@ -89,10 +89,10 @@ function ArtifactInput({target,persistent}:{target:ArtifactRef;persistent:boolea
     const read=()=>{
       const from=(root.dataset.artifactFrom as ArtifactState|undefined)||"hero";
       const to=(root.dataset.artifactTo as ArtifactState|undefined)||from;
-      target.current={from,to,t:clamp01(Number(root.dataset.artifactMix)||0),opacity:clamp01(Number(root.dataset.artifactOpacity)||1)};
+      target.current.from=from;target.current.to=to;target.current.t=clamp01(Number(root.dataset.artifactMix)||0);target.current.opacity=clamp01(Number(root.dataset.artifactOpacity)||1);
       invalidate();
     };
-    const onArtifact=(event:Event)=>{target.current=(event as CustomEvent<ArtifactTarget>).detail;invalidate();};
+    const onArtifact=(event:Event)=>{const detail=(event as CustomEvent<ArtifactTarget>).detail;target.current.from=detail.from;target.current.to=detail.to;target.current.t=detail.t;target.current.opacity=detail.opacity;invalidate();};
     read();window.addEventListener("portfolio-artifact",onArtifact);
     return()=>window.removeEventListener("portfolio-artifact",onArtifact);
   },[invalidate,persistent,target]);
