@@ -160,6 +160,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       if(resolved.some(item=>!item))return;
       const items=resolved as {state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number;top:number;point:{x:number;y:number;scale:number}}[];
       const start=innerHeight*.82,settle=innerHeight*.55;
+      if(innerHeight+scrollY>=document.documentElement.scrollHeight-2)items[items.length-1].top=settle-1;
       let from=items[0].state,to=items[0].state,t=0,a=items[0].point,b=items[0].point;
       for(let index=1;index<items.length;index++){
         const item=items[index],previous=items[index-1];
