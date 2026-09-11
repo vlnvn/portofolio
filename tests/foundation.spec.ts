@@ -153,3 +153,15 @@ test("semantic artifacts keep moving while pointer is stationary",async({page},t
   const after=await page.locator("html").getAttribute("data-signal-tilt");
   expect(before).not.toBe(after);
 });
+
+
+test("rapid scroll uses inertial artifact travel instead of teleporting",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","artifact transport probe runs once");
+  await page.setViewportSize({width:1440,height:900});await page.goto("/");
+  const artifact=page.locator(".persistent-artifact");
+  await expect.poll(()=>artifact.getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
+  await page.evaluate(()=>document.getElementById("nara")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>artifact.getAttribute("data-artifact-motion"),{timeout:1000}).toBe("chasing");
+  await expect.poll(()=>artifact.getAttribute("data-artifact-motion"),{timeout:3000}).toBe("settled");
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("nara");
+});

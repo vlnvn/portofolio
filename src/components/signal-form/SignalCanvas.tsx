@@ -12,6 +12,7 @@ type ArtifactDetail={from:ArtifactState;to:ArtifactState;t:number;opacity:number
 const clamp=(value:number,min=-1,max=1)=>Math.max(min,Math.min(max,value));
 const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
 const smoothstep=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
+const ease=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
 
 export function SignalCanvas({hostSelector=".hero",persistent=false,variant="artifact"}:{hostSelector?:string;persistent?:boolean;variant?:"artifact"|"404"}){
   const layerRef=useRef<HTMLDivElement>(null);
@@ -123,8 +124,11 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
     if(!persistent)return;
     const root=document.documentElement;
     const layer=layerRef.current;
-    let frame=0;
+    if(!layer)return;
+    let frame=0,lastTime=performance.now(),initialized=false;
 
+    type AnchorPoint={x:number;y:number;scale:number};
+    type ScrollTarget={x:number;y:number;scale:number;state:ArtifactState};
     const steps:{state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number}[]=[
       {state:"hero",section:"#top",anchor:".hero .portrait",side:"hero",scale:1},
       {state:"kairos",section:"#kairos",anchor:"#kairos .media-primary",side:"right",scale:1.08},
@@ -132,13 +136,17 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       {state:"sambut",section:"#sambut",anchor:"#sambut .media-primary",side:"left",scale:1.08},
       {state:"colors",section:"#colors",anchor:"#colors .media-primary",side:"right",scale:.82},
       {state:"aether",section:"#aether3d",anchor:"#aether3d .media-primary",side:"left",scale:.92},
-      {state:"nara",section:"#nara",anchor:"#nara .media-primary",side:"left",scale:1.0},
+      {state:"nara",section:"#nara",anchor:"#nara .media-primary",side:"left",scale:1.02},
       {state:"hero",section:"#contact",anchor:"#contact",side:"contact",scale:.82},
     ];
 
-    const anchorFor=(element:HTMLElement,side:"hero"|"left"|"right"|"contact",scale:number)=>{
+    const target:ScrollTarget={x:innerWidth*.75,y:innerHeight*.7,scale:1,state:"hero"};
+    const visual:ScrollTarget={...target};
+    const morph={from:"hero" as ArtifactState,to:"hero" as ArtifactState,t:1,pending:"hero" as ArtifactState};
+
+    const anchorFor=(element:HTMLElement,side:"hero"|"left"|"right"|"contact",scale:number):AnchorPoint=>{
       const rect=element.getBoundingClientRect();
-      const width=layer?.offsetWidth||280,height=layer?.offsetHeight||225;
+      const width=layer.offsetWidth||280,height=layer.offsetHeight||225;
       const minX=width*.52+14,maxX=innerWidth-width*.52-14;
       const minY=112+height*.5,maxY=innerHeight-height*.52-14;
       if(side==="hero")return {x:clamp(rect.right-width*.1,minX,maxX),y:clamp(rect.bottom-height*.12,minY,maxY),scale};
@@ -149,43 +157,87 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       return {x:clamp(x,minX,maxX),y:clamp(y,minY,maxY),scale};
     };
 
-    const apply=()=>{
-      frame=0;
-      if(!layer)return;
+    const sampleTarget=()=>{
       const resolved=steps.map(step=>{
         const section=document.querySelector<HTMLElement>(step.section);
         const anchor=document.querySelector<HTMLElement>(step.anchor);
         return section&&anchor?{...step,top:section.getBoundingClientRect().top,point:anchorFor(anchor,step.side,step.scale)}:null;
       });
-      if(resolved.some(item=>!item))return;
-      const items=resolved as {state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number;top:number;point:{x:number;y:number;scale:number}}[];
+      if(resolved.some(item=>!item))return false;
+      const items=resolved as {state:ArtifactState;section:string;anchor:string;side:"hero"|"left"|"right"|"contact";scale:number;top:number;point:AnchorPoint}[];
       const start=innerHeight*.82,settle=innerHeight*.55;
       if(innerHeight+scrollY>=document.documentElement.scrollHeight-2)items[items.length-1].top=settle-1;
-      let from=items[0].state,to=items[0].state,t=0,a=items[0].point,b=items[0].point;
+      let from=items[0],to=items[0],mix=0;
       for(let index=1;index<items.length;index++){
         const item=items[index],previous=items[index-1];
-        if(item.top<=settle){
-          from=item.state;to=item.state;t=0;a=item.point;b=item.point;
-          continue;
-        }
-        if(item.top<start){
-          from=previous.state;to=item.state;t=smoothstep((start-item.top)/(start-settle));a=previous.point;b=item.point;
-        }
+        if(item.top<=settle){from=item;to=item;mix=0;continue;}
+        if(item.top<start){from=previous;to=item;mix=smoothstep((start-item.top)/(start-settle));}
         break;
       }
-      const lift=Math.sin(Math.PI*t)*22;
-      const x=lerp(a.x,b.x,t),y=lerp(a.y,b.y,t)-lift,scale=lerp(a.scale,b.scale,t)*(1+Math.sin(Math.PI*t)*.035);
-      layer.style.setProperty("--artifact-x",`${x.toFixed(2)}px`);
-      layer.style.setProperty("--artifact-y",`${y.toFixed(2)}px`);
-      layer.style.setProperty("--artifact-scale",scale.toFixed(3));
-      layer.style.setProperty("--artifact-opacity","1");
-      layer.dataset.artifactPhase=from===to?`${from}:settled`:`${from}:${to}`;
-      root.dataset.artifactFrom=from;root.dataset.artifactTo=to;root.dataset.artifactMix=t.toFixed(3);root.dataset.artifactOpacity="1.000";
-      const detail:ArtifactDetail={from,to,t,opacity:1};
-      window.dispatchEvent(new CustomEvent<ArtifactDetail>("portfolio-artifact",{detail}));
+      const lift=Math.sin(Math.PI*mix)*22;
+      target.x=lerp(from.point.x,to.point.x,mix);
+      target.y=lerp(from.point.y,to.point.y,mix)-lift;
+      target.scale=lerp(from.point.scale,to.point.scale,mix)*(1+Math.sin(Math.PI*mix)*.035);
+      target.state=mix>=.44?to.state:from.state;
+      morph.pending=target.state;
+      if(!initialized){
+        visual.x=target.x;visual.y=target.y;visual.scale=target.scale;visual.state=target.state;
+        morph.from=target.state;morph.to=target.state;morph.pending=target.state;morph.t=1;
+        initialized=true;
+      }
+      return true;
     };
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(apply);};
-    apply();window.addEventListener("scroll",schedule,{passive:true});window.addEventListener("resize",schedule,{passive:true});
+
+    const publish=(active:boolean)=>{
+      layer.style.setProperty("--artifact-x",`${visual.x.toFixed(2)}px`);
+      layer.style.setProperty("--artifact-y",`${visual.y.toFixed(2)}px`);
+      layer.style.setProperty("--artifact-scale",visual.scale.toFixed(3));
+      layer.style.setProperty("--artifact-opacity","1");
+      const eased=ease(morph.t);
+      layer.dataset.artifactPhase=morph.t<1?`${morph.from}:${morph.to}`:`${morph.to}:settled`;
+      layer.dataset.artifactMotion=active?"chasing":"settled";
+      root.dataset.artifactFrom=morph.from;root.dataset.artifactTo=morph.to;root.dataset.artifactMix=eased.toFixed(3);root.dataset.artifactOpacity="1.000";
+      window.dispatchEvent(new CustomEvent<ArtifactDetail>("portfolio-artifact",{detail:{from:morph.from,to:morph.to,t:eased,opacity:1}}));
+    };
+
+    const startMorph=()=>{
+      if(morph.pending===morph.to&&morph.t>=1)return;
+      if(morph.t<1)return;
+      morph.from=morph.to;
+      morph.to=morph.pending;
+      morph.t=morph.from===morph.to?1:0;
+    };
+
+    const tick=(now:number)=>{
+      frame=0;
+      const dt=Math.min(.05,Math.max(.001,(now-lastTime)/1000));lastTime=now;
+      startMorph();
+      if(morph.t<1){
+        morph.t=Math.min(1,morph.t+dt/.34);
+        if(morph.t>=1){visual.state=morph.to;if(morph.pending!==morph.to)startMorph();}
+      }
+
+      const dx=target.x-visual.x,dy=target.y-visual.y,distance=Math.hypot(dx,dy);
+      const alpha=1-Math.exp(-7.2*dt);
+      const desiredStep=distance*alpha,maxStep=1450*dt,step=Math.min(desiredStep,maxStep);
+      if(distance>.001){visual.x+=dx/distance*step;visual.y+=dy/distance*step;}
+      visual.scale+= (target.scale-visual.scale)*(1-Math.exp(-8.5*dt));
+
+      const positionActive=Math.hypot(target.x-visual.x,target.y-visual.y)>.55;
+      const scaleActive=Math.abs(target.scale-visual.scale)>.0015;
+      const morphActive=morph.t<1||morph.pending!==morph.to;
+      const active=positionActive||scaleActive||morphActive;
+      publish(active);
+      if(active)frame=requestAnimationFrame(tick);
+    };
+
+    const schedule=()=>{
+      if(!sampleTarget())return;
+      if(!frame){lastTime=performance.now();frame=requestAnimationFrame(tick);}
+    };
+
+    if(sampleTarget())publish(false);
+    window.addEventListener("scroll",schedule,{passive:true});window.addEventListener("resize",schedule,{passive:true});
     return()=>{cancelAnimationFrame(frame);window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);delete root.dataset.artifactFrom;delete root.dataset.artifactTo;delete root.dataset.artifactMix;delete root.dataset.artifactOpacity;};
   },[persistent]);
 
