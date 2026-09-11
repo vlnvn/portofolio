@@ -88,17 +88,18 @@ test("aperture responds directly to mouse in hero and 404",async({page},testInfo
   await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });
 
-test("kinetic evidence sequence changes project media with scroll",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","scroll choreography probe runs once");
+test("persistent artifact morphs while project reading planes stay grounded",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","artifact narrative probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
-  const chapter=page.locator("#aether3d");
-  await chapter.scrollIntoViewIfNeeded();await page.waitForTimeout(80);
-  const centered=await chapter.getAttribute("data-evidence-progress");
-  await page.evaluate(()=>scrollBy(0,420));await page.waitForTimeout(80);
-  const leaving=await chapter.getAttribute("data-evidence-progress");
-  expect(centered).not.toBeNull();expect(leaving).not.toBeNull();expect(centered).not.toBe(leaving);
-  const transform=await chapter.locator(".media-primary").evaluate(el=>getComputedStyle(el).transform);
-  expect(transform).not.toBe("none");
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("hero");
+  await page.evaluate(()=>document.getElementById("kairos")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("kairos");
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("kairos");
+  await expect(page.locator("#kairos .chapter-copy")).toHaveCSS("opacity","1");
+  await page.evaluate(()=>document.getElementById("ayam-kalintang")?.scrollIntoView({behavior:"instant",block:"center"}));
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-from"),{timeout:3000}).toBe("kalintang");
+  await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("kalintang");
+  await expect(page.locator("#ayam-kalintang .chapter-copy")).toHaveCSS("opacity","1");
 });
 
 test("project sheen and shadow respond to pointer",async({page},testInfo)=>{

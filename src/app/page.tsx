@@ -1,5 +1,5 @@
 import { AdaptiveNav } from "@/components/portfolio/AdaptiveNav";
-import { ChapterMotionController } from "@/components/portfolio/ChapterMotionController";
+import { SignalCanvas } from "@/components/signal-form/SignalCanvas";
 import { ContactFooter } from "@/components/portfolio/ContactFooter";
 import { Hero } from "@/components/portfolio/Hero";
 import { ProjectChapter } from "@/components/portfolio/ProjectChapter";
@@ -19,7 +19,7 @@ export default function Home() {
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(profile).replace(/</g,"\\u003c")}}/>
     <a className="skip-link" href="#main">Skip to content</a>
     <AdaptiveNav/>
-    <ChapterMotionController/>
+    <SignalCanvas persistent/>
     <main id="main"><Hero/>{projects.map(project=><ProjectChapter key={project.id} project={project}/>)}</main>
     <ContactFooter/>
   </>;

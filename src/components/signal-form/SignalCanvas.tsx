@@ -1,15 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StaticSignalPoster } from "./StaticSignalPoster";
 import type SignalSceneType from "./SignalScene";
 
 type SceneComponent=typeof SignalSceneType;
 type Ambient={ax:number;ay:number;bx:number;by:number;scaleA:number;scaleB:number;opacityA:number;opacityB:number};
+type ArtifactState="hero"|"kairos"|"kalintang";
+type ArtifactDetail={from:ArtifactState;to:ArtifactState;t:number;opacity:number};
 
 const clamp=(value:number,min=-1,max=1)=>Math.max(min,Math.min(max,value));
+const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
+const smoothstep=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
 
-export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
+export function SignalCanvas({hostSelector=".hero",persistent=false}:{hostSelector?:string;persistent?:boolean}){
+  const layerRef=useRef<HTMLDivElement>(null);
   const [Scene,setScene]=useState<SceneComponent|null>(null);
   const [eligible,setEligible]=useState(false);
   const [failed,setFailed]=useState(false);
@@ -114,6 +119,73 @@ export function SignalCanvas({hostSelector=".hero"}:{hostSelector?:string}){
     return()=>{cancelAnimationFrame(frame);window.removeEventListener("mousemove",onMouse);window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);window.removeEventListener("blur",reset);document.documentElement.removeEventListener("mouseleave",reset);reduced.removeEventListener("change",schedule);desktopMotion.removeEventListener("change",schedule);};
   },[hostSelector]);
 
+  useEffect(()=>{
+    if(!persistent)return;
+    const root=document.documentElement;
+    const layer=layerRef.current;
+    let frame=0;
+
+    const anchor=(element:HTMLElement,kind:ArtifactState)=>{
+      const rect=element.getBoundingClientRect();
+      if(kind==="hero")return {x:clamp(rect.left+rect.width*.82,170,innerWidth-170),y:clamp(rect.top+rect.height*.78,145,innerHeight-145),scale:1};
+      if(kind==="kairos")return {x:clamp(rect.right-46,170,innerWidth-170),y:clamp(rect.bottom-72,145,innerHeight-145),scale:.9};
+      return {x:clamp(rect.left+54,170,innerWidth-170),y:clamp(rect.bottom-78,145,innerHeight-145),scale:.92};
+    };
+
+    const apply=()=>{
+      frame=0;
+      if(!layer)return;
+      const portrait=document.querySelector<HTMLElement>(".hero .portrait");
+      const kairos=document.querySelector<HTMLElement>("#kairos .project-media");
+      const kalintang=document.querySelector<HTMLElement>("#ayam-kalintang .project-media");
+      const kairosSection=document.getElementById("kairos");
+      const kalintangSection=document.getElementById("ayam-kalintang");
+      const sambutSection=document.getElementById("sambut");
+      if(!portrait||!kairos||!kalintang||!kairosSection||!kalintangSection||!sambutSection)return;
+
+      const heroAnchor=anchor(portrait,"hero");
+      const kairosAnchor=anchor(kairos,"kairos");
+      const kalintangAnchor=anchor(kalintang,"kalintang");
+      const kairosRect=kairosSection.getBoundingClientRect();
+      const kalintangRect=kalintangSection.getBoundingClientRect();
+      const sambutRect=sambutSection.getBoundingClientRect();
+      const start=innerHeight*.78,end=innerHeight*.38;
+      let from:ArtifactState="hero",to:ArtifactState="hero",t=0,opacity=1,a=heroAnchor,b=heroAnchor;
+
+      if(kairosRect.top<=start&&kairosRect.top>end){
+        from="hero";to="kairos";t=smoothstep((start-kairosRect.top)/(start-end));a=heroAnchor;b=kairosAnchor;
+      }else if(kairosRect.top<=end&&kalintangRect.top>start){
+        from="kairos";to="kairos";a=kairosAnchor;b=kairosAnchor;
+      }else if(kalintangRect.top<=start&&kalintangRect.top>end){
+        from="kairos";to="kalintang";t=smoothstep((start-kalintangRect.top)/(start-end));a=kairosAnchor;b=kalintangAnchor;
+      }else if(kalintangRect.top<=end){
+        from="kalintang";to="kalintang";a=kalintangAnchor;b=kalintangAnchor;
+        if(sambutRect.top<=innerHeight*.72)opacity=1-smoothstep((innerHeight*.72-sambutRect.top)/(innerHeight*.30));
+      }
+
+      const x=lerp(a.x,b.x,t),y=lerp(a.y,b.y,t),scale=lerp(a.scale,b.scale,t);
+      layer.style.setProperty("--artifact-x",`${x.toFixed(2)}px`);
+      layer.style.setProperty("--artifact-y",`${y.toFixed(2)}px`);
+      layer.style.setProperty("--artifact-scale",scale.toFixed(3));
+      layer.style.setProperty("--artifact-opacity",clamp(opacity,0,1).toFixed(3));
+      layer.dataset.artifactPhase=from===to?`${from}:settled`:`${from}:${to}`;
+      root.dataset.artifactFrom=from;root.dataset.artifactTo=to;root.dataset.artifactMix=t.toFixed(3);root.dataset.artifactOpacity=clamp(opacity,0,1).toFixed(3);
+      const detail:ArtifactDetail={from,to,t,opacity:clamp(opacity,0,1)};
+      window.dispatchEvent(new CustomEvent<ArtifactDetail>("portfolio-artifact",{detail}));
+    };
+    const schedule=()=>{if(!frame)frame=requestAnimationFrame(apply);};
+    apply();window.addEventListener("scroll",schedule,{passive:true});window.addEventListener("resize",schedule,{passive:true});
+    return()=>{cancelAnimationFrame(frame);window.removeEventListener("scroll",schedule);window.removeEventListener("resize",schedule);delete root.dataset.artifactFrom;delete root.dataset.artifactTo;delete root.dataset.artifactMix;delete root.dataset.artifactOpacity;};
+  },[persistent]);
+
   const webgl=eligible&&Scene&&!failed;
-  return <div className="signal-layer" aria-hidden="true" data-mode={webgl?"webgl":"poster"}>{webgl?<Scene dark={dark} onLost={()=>{setFailed(true);setScene(null)}}/>:<StaticSignalPoster/>}</div>;
+
+  useEffect(()=>{
+    if(!persistent)return;
+    const root=document.documentElement;
+    root.dataset.signalFallback=webgl?"false":"true";
+    return()=>{delete root.dataset.signalFallback;};
+  },[persistent,webgl]);
+
+  return <div ref={layerRef} className={`signal-layer${persistent?" persistent-artifact":""}`} aria-hidden="true" data-mode={webgl?"webgl":"poster"}>{webgl?<Scene dark={dark} persistent={persistent} onLost={()=>{setFailed(true);setScene(null)}}/>:<StaticSignalPoster/>}</div>;
 }
