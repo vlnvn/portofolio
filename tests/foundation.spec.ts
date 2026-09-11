@@ -123,8 +123,9 @@ test("desktop 404 uses the interactive 3D aperture",async({page},testInfo)=>{
   const response=await page.goto("/missing-interactive-page");
   expect(response?.status()).toBe(404);
   await expect.poll(()=>page.locator(".not-found .signal-layer").getAttribute("data-mode"),{timeout:5000}).toBe("webgl");
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(1200);
   const before=Number(await page.locator("html").getAttribute("data-signal-frames"));
   await page.mouse.move(1120,420);
   await expect.poll(async()=>Number(await page.locator("html").getAttribute("data-signal-frames")),{timeout:2000}).toBeGreaterThan(before);
+  await expect.poll(()=>page.locator("html").getAttribute("data-signal-tilt"),{timeout:2000}).not.toBe("0.000,0.000");
 });
