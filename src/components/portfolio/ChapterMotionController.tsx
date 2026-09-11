@@ -15,7 +15,7 @@ function motionFor(id:string,signed:number,amplitude:number):Motion{
   const distance=Math.abs(eased);
   const focus=1-distance;
   const scale=(edgeLoss:number)=>1-distance*edgeLoss*amplitude;
-  const opacity=(floor:number)=>floor+(1-floor)*focus;
+  const opacity=(floor:number)=>1-(1-floor)*distance*amplitude;
   switch(id){
     case "kairos": return {mediaX:eased*72*amplitude,mediaY:eased*42*amplitude,copyX:-eased*34*amplitude,copyY:-eased*18*amplitude,rx:-eased*2.2*amplitude,ry:eased*7.2*amplitude,scale:scale(.065),secondaryX:eased*26*amplitude,secondaryY:-eased*16*amplitude,z:focus*42*amplitude,light:eased*64*amplitude,copyOpacity:opacity(.76),mediaOpacity:opacity(.72)};
     case "ayam-kalintang": return {mediaX:-eased*68*amplitude,mediaY:eased*50*amplitude,copyX:eased*30*amplitude,copyY:-eased*20*amplitude,rx:eased*2.8*amplitude,ry:-eased*5.8*amplitude,scale:scale(.06),secondaryX:-eased*48*amplitude,secondaryY:eased*24*amplitude,z:focus*38*amplitude,light:-eased*58*amplitude,copyOpacity:opacity(.77),mediaOpacity:opacity(.73)};
@@ -37,7 +37,7 @@ export function ChapterMotionController(){
       frame=0;
       const viewport=Math.max(innerHeight,1);
       const mobile=innerWidth<700;
-      const amplitude=reduced.matches?0:(mobile?.22:1);
+      const amplitude=reduced.matches?0:(mobile ? .22 : 1);
       chapters.forEach(chapter=>{
         const rect=chapter.getBoundingClientRect();
         const range=viewport*.58+rect.height*.42;
