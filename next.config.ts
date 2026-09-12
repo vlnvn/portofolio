@@ -1,9 +1,5 @@
 import type { NextConfig } from "next";
 
-const isHttpsDeployment =
-  process.env.NEXT_PUBLIC_SITE_URL?.startsWith("https://") ||
-  process.env.VERCEL === "1";
-
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline'",
@@ -16,7 +12,6 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  ...(isHttpsDeployment ? ["upgrade-insecure-requests"] : []),
 ].join("; ");
 
 const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
