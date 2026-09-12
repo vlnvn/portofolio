@@ -1,0 +1,2 @@
+import { siteLinks } from "@/lib/projects";
+export function ContactFooter(){return <footer className="contact" id="contact"><p className="contact-label">Contact</p><a className="email" href={siteLinks.email}>alvenvalensius93@gmail.com</a><div><a href={siteLinks.github} target="_blank" rel="noreferrer">GitHub</a><a href={siteLinks.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></div><p>Valensius Alven</p></footer>}
