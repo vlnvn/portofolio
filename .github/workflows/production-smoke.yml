@@ -1,0 +1,34 @@
+name: Production Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://portofolio-psi-dun.vercel.app' }}
+
+    steps:
+      - name: Check public routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in / /work/kairos /work/ayam-kalintang; do
+            curl --fail --location --silent --show-error --max-time 15               "$PRODUCTION_URL$path"               --output /dev/null
+          done
+
+      - name: Check production security headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(curl --fail --location --silent --show-error --max-time 15 --head "$PRODUCTION_URL/")"
+          printf '%s\n' "$headers" | grep -qi '^strict-transport-security:'
+          printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
+          printf '%s\n' "$headers" | grep -qi '^content-security-policy:'

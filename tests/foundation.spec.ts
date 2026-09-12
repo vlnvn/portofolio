@@ -198,3 +198,21 @@ test("NARA begins closing back to aperture before contact occupies the viewport"
   await page.evaluate(()=>{const contact=document.getElementById("contact");if(contact)scrollTo(0,contact.offsetTop-innerHeight*.86);});
   await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("hero");
 });
+
+test("baseline mobile payload stays within the release budget",async({page},testInfo)=>{
+  test.skip(testInfo.project.name!=="chromium","payload budget runs once");
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.setViewportSize({width:390,height:844});
+  await page.goto("/",{waitUntil:"networkidle"});
+  const metrics=await page.evaluate(()=>{
+    const resources=performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+    return {
+      count:resources.length,
+      totalEncoded:resources.reduce((sum,item)=>sum+item.encodedBodySize,0),
+      scriptEncoded:resources.filter(item=>item.initiatorType==="script").reduce((sum,item)=>sum+item.encodedBodySize,0),
+    };
+  });
+  expect(metrics.count).toBeLessThanOrEqual(80);
+  expect(metrics.totalEncoded).toBeLessThanOrEqual(3_500_000);
+  expect(metrics.scriptEncoded).toBeLessThanOrEqual(2_000_000);
+});
