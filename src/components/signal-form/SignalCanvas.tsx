@@ -12,7 +12,6 @@ type ArtifactDetail={from:ArtifactState;to:ArtifactState;t:number;opacity:number
 const clamp=(value:number,min=-1,max=1)=>Math.max(min,Math.min(max,value));
 const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
 const smoothstep=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
-const ease=(value:number)=>{const t=clamp(value,0,1);return t*t*(3-2*t);};
 
 export function SignalCanvas({hostSelector=".hero",persistent=false,variant="artifact"}:{hostSelector?:string;persistent?:boolean;variant?:"artifact"|"404"}){
   const layerRef=useRef<HTMLDivElement>(null);
@@ -197,7 +196,7 @@ export function SignalCanvas({hostSelector=".hero",persistent=false,variant="art
       layer.style.setProperty("--artifact-y",`${visual.y.toFixed(2)}px`);
       layer.style.setProperty("--artifact-scale",visual.scale.toFixed(3));
       layer.style.setProperty("--artifact-opacity","1");
-      const eased=ease(morph.t);
+      const eased=smoothstep(morph.t);
       layer.dataset.artifactPhase=morph.t<1?`${morph.from}:${morph.to}`:`${morph.to}:settled`;
       layer.dataset.artifactMotion=active?"chasing":"settled";
       root.dataset.artifactFrom=morph.from;root.dataset.artifactTo=morph.to;root.dataset.artifactMix=eased.toFixed(3);root.dataset.artifactOpacity="1.000";

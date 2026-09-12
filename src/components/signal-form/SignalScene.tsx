@@ -64,19 +64,6 @@ function digitFourShape(){
   return shape;
 }
 
-function annularSectorGeometry(inner:number,outer:number,start:number,end:number){
-  const inset=.045;
-  const a0=start+inset,a1=end-inset;
-  const shape=new THREE.Shape();
-  shape.moveTo(Math.cos(a0)*inner,Math.sin(a0)*inner);
-  shape.lineTo(Math.cos(a0)*outer,Math.sin(a0)*outer);
-  shape.absarc(0,0,outer,a0,a1,false);
-  shape.lineTo(Math.cos(a1)*inner,Math.sin(a1)*inner);
-  shape.absarc(0,0,inner,a1,a0,true);
-  shape.closePath();
-  return extrude(shape,.11,.018);
-}
-
 function appleGeometry(){
   const profile=[
     new THREE.Vector2(0,-1.03),
@@ -178,14 +165,9 @@ function useMaterials(dark:boolean){
     camera:new THREE.MeshStandardMaterial({color:"#17355F",roughness:.3,metalness:.22}),
     glass:new THREE.MeshStandardMaterial({color:"#071A33",roughness:.08,metalness:.5}),
     silver:new THREE.MeshStandardMaterial({color:"#A8C4E6",roughness:.24,metalness:.42}),
-    plate:new THREE.MeshStandardMaterial({color:"#F4F7FB",roughness:.34,metalness:.03}),
     green:new THREE.MeshStandardMaterial({color:"#55976E",roughness:.45,metalness:0}),
-    food:new THREE.MeshStandardMaterial({color:"#D49A42",roughness:.48,metalness:0}),
-    fruit:new THREE.MeshStandardMaterial({color:"#D87888",roughness:.38,metalness:.03}),
     apple:new THREE.MeshPhysicalMaterial({color:"#C92F3C",roughness:.24,metalness:.02,clearcoat:.68,clearcoatRoughness:.18}),
     stem:new THREE.MeshStandardMaterial({color:"#6D472D",roughness:.58,metalness:0}),
-    carb:new THREE.MeshStandardMaterial({color:"#E5B361",roughness:.4,metalness:.02}),
-    protein:new THREE.MeshStandardMaterial({color:"#869FE0",roughness:.34,metalness:.06}),
     xAxis:new THREE.MeshStandardMaterial({color:"#FF8F8A",roughness:.28,metalness:.12}),
     yAxis:new THREE.MeshStandardMaterial({color:"#87E5AE",roughness:.28,metalness:.12}),
     zAxis:new THREE.MeshStandardMaterial({color:"#83BAFF",roughness:.28,metalness:.12}),
@@ -247,9 +229,8 @@ function ArtifactRig({target,artifact,dark}:{target:MotionRef;artifact:ArtifactR
     const naraLeaf=leafGeometry();
     const naraApple=appleGeometry();
     const edges=new THREE.EdgesGeometry(box,25);
-    const plate=new THREE.CylinderGeometry(1,1,.12,64,1,false);
     const cone=new THREE.ConeGeometry(.11,.28,24);
-    return {box,cylinder,sphere,torus,thinTorus,heroRing0,heroRing1,heroRing2,heroBlade,heroNode,card,cameraBody,smallRounded,drumstick,four,naraLeaf,naraApple,edges,plate,cone};
+    return {box,cylinder,sphere,torus,thinTorus,heroRing0,heroRing1,heroRing2,heroBlade,heroNode,card,cameraBody,smallRounded,drumstick,four,naraLeaf,naraApple,edges,cone};
   },[]);
   useEffect(()=>()=>{Object.values(g).forEach(geometry=>geometry.dispose());},[g]);
 
