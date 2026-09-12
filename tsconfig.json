@@ -41,7 +41,6 @@
     "prototypes/**",
     "calibrations/**",
     "design-review/**",
-    "experiments/**",
-    ".tmp-tools/**"
+    "experiments/**"
   ]
 }

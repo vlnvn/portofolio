@@ -193,7 +193,7 @@ test("professional context bridges hero and selected work",async({page},testInfo
 });
 
 test("NARA begins closing back to aperture before contact occupies the viewport",async({page},testInfo)=>{
-  test.skip(testInfo.project.name!=="chromium","final semantic handoff probe runs once");
+  test.skip(testInfo.project.name!=="chromium","final semantic transition probe runs once");
   await page.setViewportSize({width:1440,height:900});await page.goto("/");
   await page.evaluate(()=>{const contact=document.getElementById("contact");if(contact)scrollTo(0,contact.offsetTop-innerHeight*.86);});
   await expect.poll(()=>page.locator("html").getAttribute("data-artifact-to"),{timeout:3000}).toBe("hero");
