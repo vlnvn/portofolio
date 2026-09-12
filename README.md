@@ -1,44 +1,47 @@
-# Valensius Alven portfolio
+# Valensius Alven — Portfolio
 
-Production candidate for Valensius Alven, an Informatics Engineering student at Universitas Padjadjaran. The site presents six projects through verified roles, ownership boundaries, real artifacts and recorded outcomes. The Kinetic Lightfield layer progressively enhances the static HTML with a demand-rendered Three.js hero aperture, responsive lighting and restrained media depth.
+Personal engineering portfolio built with Next.js, TypeScript, React Three Fiber and Three.js. The site presents selected software and AI work through concise case studies, real project media and progressive 3D interaction.
 
-## Run locally
+## Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- React Three Fiber / Three.js
+- Playwright
+- GitHub Actions
+
+## Architecture
+
+The content layer is server-rendered and statically generated. WebGL is loaded only on capable desktop devices and falls back to a deterministic static poster when WebGL is unavailable or reduced motion is requested.
+
+The site has no database, authentication layer or application API. Project media is served from the repository and optimized through Next.js Image.
+
+## Local development
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Quality gates:
+## Quality gates
 
 ```bash
 npm run lint
 npm run typecheck
 npm run build
-npx playwright test --project=chromium
-npx playwright test tests/foundation.spec.ts --project=webkit --workers=1
+npm run test:e2e:critical
+npm run audit:prod
 ```
 
-## Routes
+The CI release gate runs linting, type checking, a production build, production-dependency auditing and the critical Playwright suite across Chromium, Firefox and WebKit.
 
-- `/`
-- `/work/kairos`
-- `/work/ayam-kalintang`
-- `/sitemap.xml`
-- `/robots.txt`
+## Environment
 
-## Authority and handoff
+`NEXT_PUBLIC_SITE_URL` can be set when using a custom canonical domain. On Vercel, the site automatically falls back to `VERCEL_PROJECT_PRODUCTION_URL` for canonical URLs, Open Graph metadata, robots and the sitemap.
 
-- `EVIDENCE.md` is the factual source of truth.
-- `DESIGN.md` is the current runtime design authority, including the later human-approved Kinetic Lightfield changes.
-- `PRD_V2_KINETIC_BLUEPRINT.md` and `research/V2_3_1_FINAL_FREEZE.md` preserve the earlier product/static-design baseline; they do not override later approved runtime decisions.
-- `research/PRODUCTION_ASSET_MANIFEST.md` records real media and evidence boundaries.
-- `research/V3_1_RC_ACCEPTANCE.md` records the release-candidate gate and remaining launch inputs.
+See `.env.example` for the local format.
 
 ## Deployment
 
-Copy `.env.example` to your local/deployment environment and set `NEXT_PUBLIC_SITE_URL` to the final HTTPS origin before production. That origin is used for canonical URLs, Open Graph resolution, robots and the sitemap.
-
-The site is intentionally static-first: semantic project content is server-rendered, Three.js is a progressive Hero enhancement, and there is no backend/database dependency to deploy. No résumé action is published until a verified PDF is supplied.
-
-A loading skeleton, LocalBusiness schema and `llms.txt` are intentionally omitted because the current static portfolio does not need them.
+The application is designed for Vercel's standard Next.js deployment with the repository root as the project root. No database migrations, background workers or external runtime services are required.
